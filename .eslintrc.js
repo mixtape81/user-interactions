@@ -1,9 +1,18 @@
 module.exports = {
-  extends: './node_modules/eslint-config-airbnb-base/index.js',
-  rules: {
+  "extends": "./node_modules/eslint-config-airbnb-base/index.js",
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true,
+    "mocha": true
+  },
+  "rules": {
     'comma-dangle': ["error", "never"]
   }
 };
+
+
+
 
 // module.exports = {
 //   "extends": "airbnb",
