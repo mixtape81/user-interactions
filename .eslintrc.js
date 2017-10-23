@@ -7,11 +7,18 @@ module.exports = {
     "mocha": true
   },
   "rules": {
-    'comma-dangle': ["error", "never"]
+    "comma-dangle": ["error", "never"]
+    // "import/no-extraneous-dependencies": ["error", { "devDependencies": ["tests/**"] }]
   }
 };
 
 
+
+// "import/no-extraneous-dependencies": ["error", {
+//       "devDependencies": [
+//         "tests/**",
+//       ]
+//     }],
 
 
 // module.exports = {

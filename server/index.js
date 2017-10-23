@@ -8,9 +8,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const port = process.env.PORT || 2244;
 
 app.get('/', (req, res) => {
-  res.send('Hello World');
+  res.send('Hello, world!');
 });
 
 app.listen(port, () => {
   console.log('Listening on port 2244');
 });
+
+module.exports = {
+  app
+};
+
