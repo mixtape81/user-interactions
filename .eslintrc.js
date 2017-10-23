@@ -7,28 +7,7 @@ module.exports = {
     "mocha": true
   },
   "rules": {
-    'comma-dangle': ["error", "never"]
+    "comma-dangle": ["error", "never"]
   }
-};
-
-
-
-
-// module.exports = {
-//   "extends": "airbnb",
-//   "parser": "babel-eslint",
-//   "env": {
-//     "browser": true,
-//     "node": true,
-//     "es6": true,
-//     "mocha": true
-//   },
-//   "rules": {
-//     "import/no-extraneous-dependencies": ["error", {
-//       "devDependencies": [
-//         "spec/**",
-//       ]
-//     }],
-//     "comma-dangle": ["error", "never"]
-//   }
-// };
+}
+// "import/no-extraneous-dependencies": ["error", { "devDependencies": ["tests/**"] }]
