@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "server-dev": "nodemon --inspect server/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --reporter nyan tests/server-spec.js --exit"
   },
   "author": "Neha Chaudhary",
   "license": "ISC",
