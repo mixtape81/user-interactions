@@ -6,7 +6,7 @@ if (environment) {
   const env_Vars = require('dotenv').config({ path: envPath });
 }
 
-const host = process.env.HOSTNAME || 'localhost';
+const host = process.env.HOSTNAME || '127.0.0.1';
 const port = process.env.PORT || 2000;
 
 describe('server connection test', () => {
