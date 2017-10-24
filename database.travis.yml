@@ -2,6 +2,5 @@ default: &default
   adapter: postgresql
 test:
   database: travis_ci_test
-  username: mixtape
-  password: mixtape
+  username: postgres
   encoding: utf8
