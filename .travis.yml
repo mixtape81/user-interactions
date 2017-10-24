@@ -7,5 +7,5 @@ addons:
   postgresql: "6.4"
 
 before_script:
-  - psql -c "CREATE USER mixtape WITH PASSWORD 'mixtape';" -U mixtape
+  - psql -c "CREATE USER mixtape WITH PASSWORD 'mixtape';" -U postgres
   - psql -c 'create database travis_ci_test;' -U mixtape
