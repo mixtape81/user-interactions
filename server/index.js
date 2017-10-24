@@ -4,7 +4,7 @@ const db = require('../database/index.js');
 const dummydata = require('../database/dummyData.js');
 
 const app = express();
-const port = process.env.PORT || 2244;
+const port = process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,7 +28,7 @@ app.post('/dummydata', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log('Listening on port 2244');
+  console.log(`Listening on port ${process.env.PORT}`);
 });
 
 module.exports = {

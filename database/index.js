@@ -1,11 +1,17 @@
+const environment = process.env.NODE_ENV;
+const envPath = `.env.${environment}`;
+const env_Vars = require('dotenv').config({ path: envPath });
+
+console.log('Current database environment: ', environment);
 const Sequelize = require('sequelize');
 
 const config = {
-  database: 'mixtape',
-  username: 'mixtape',
-  password: 'mixtape',
+  database: process.env.DB_NAME,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
   dialect: 'postgres'
 };
+
 const db = new Sequelize(config);
 
 db.authenticate()
