@@ -1,26 +1,33 @@
-const knex = require('knex');
-const bookshelf = require('bookshelf');
-const request = require('supertest');
-const { expect } = require('chai');
+// const Sequelize = require('sequelize');
+// const server = require('../server');
+// const supertest = require('supertest');
+// const request = supertest.agent(server);
+// const { expect } = require('chai');
+const test = require('./tests.js');
 
-describe('Dtabase testing', () => {
+describe('Database testing', () => {
+  let db;
   const config = {
-    client: 'pg',
-    connection: {
-      host: '127.0.0.1',
-      user: 'mixtape',
-      password: 'mixtape',
-      database: 'mixtape',
-      charset: 'ut8'
-    }
-  };
+    database: 'mixtape',
+    username: 'mixtape',
+    password: 'mixtape',
+    dialect: 'postgres'
+};
 
   beforeEach(() => {
-    knex(config);
-    bookshelf(knex);
+    db = test.Sequelize(config);
+    db.authenticate()
+      .then(() => console.log('in test for db'))
+      .catch(err => console.log('error connecting to DBin test', err));
   });
 
   afterEach(() => {
     process.exit();
+  });
+});
+
+describe('testing once', () => {
+  it('should console log', () => {
+    console.log('connected to database for testing');
   });
 });
