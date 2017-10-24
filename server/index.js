@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('../database/index.js');
-const dummydata = require('../database/dummydata.js');
+const dummydata = require('../database/dummyData.js');
 
 const app = express();
 const port = process.env.PORT || 2244;
