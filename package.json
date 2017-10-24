@@ -6,6 +6,7 @@
   "scripts": {
     "server-dev": "NODE_ENV=development nodemon --inspect server/index.js",
     "test": "mocha --reporter nyan tests/server-spec.js --exit",
+    "test-db-travis": "mocha tests/database-spec.js --exit",
     "test-dev": "NODE_ENV=test mocha --reporter nyan tests/server-spec.js --exit",
     "test-db": "NODE_ENV=test mocha tests/database-spec.js --exit"
   },
