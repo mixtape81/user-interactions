@@ -1,10 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('../database/index.js');
+const env = require('./environment.js');
 const dummydata = require('../database/dummyData.js');
-const environment = process.env.NODE_ENV;
-const envPath = `.env.${environment}`;
-const env_Vars = require('dotenv').config({ path: envPath });
+
+console.log('environment in server', env.environment);
+
 const app = express();
 const port = process.env.PORT;
 const queries = require('../database/queries.js');
@@ -16,6 +16,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
+
+
+app.get('/playlistviews', (req, res) => {
+// use this request to send playlist views to analysis
+  res.send();
+});
+
+app.get('/songsresponses', (req, res) => {
+// use this request to send songs heard/skipped
+  res.send();
+});
+
 
 app.post('/dummydata', (req, res) => {
   dummydata.dropTables()
@@ -56,7 +68,7 @@ app.post('/view', (req, res) => {
 // });
 
 app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+  // console.log(`Listening on port ${port}`);
 });
 
 module.exports = {

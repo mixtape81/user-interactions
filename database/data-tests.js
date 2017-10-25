@@ -1,19 +1,7 @@
 const dummydata = require('./dummyData.js');
 
 dummydata.addToViewTest()
-  .then(result => {
-    console.log('result in data-tests', result);
-  })
-  .catch(err => console.log('err adding data', err));
-
-  dummydata.addToViewTest()
-  .then(result => {
-    console.log('result in data-tests', result);
-  })
-  .catch(err => console.log('err adding data', err));
-
-  dummydata.addToViewTest()
-  .then(result => {
+  .then((result) => {
     console.log('result in data-tests', result);
   })
   .catch(err => console.log('err adding data', err));

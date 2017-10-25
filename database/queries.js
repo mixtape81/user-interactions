@@ -1,22 +1,57 @@
-const db = require('./index.js');
+const { db } = require('./index.js');
+
+const addToLogs = (action) => {
+  const queryToLogs = 'insert into logs ("eventTypeId", "user_id", "sessionId", "createdAt", "updatedAt") values (?, ?, ?, ?, ?)';
+  const dataForLogs = {
+    replacements: [
+      1,
+      action.userId,
+      action.sessionId,
+      action.createdAt,
+      action.updatedAt
+    ]
+  };
+  return db.query(queryToLogs, dataForLogs).spread();
+};
 
 const addToPlayListView = (view, callback) => {
-  let queryToLogs = 'insert into logs ("eventTypeId", "user_id", "sessionId", "createdAt", "updatedAt") values \
-    (?, ?, ?, ?, ?)';
-  let queryToPlaylistView = 'insert into playlist_views ("playlist_id", \
-    "logId", "genre_id", "createdAt", "updatedAt") values (?, ?, ?, ?, ?)';
-  let dataForLogs = { replacements: [1, view.userId, view.sessionId, view.createdAt, view.updatedAt] };  
-  return db.db.query(queryToLogs, dataForLogs, callback);
-    // .then(result => {
-    //   console.log('here with result', result);
-    //   let dataForView = { replacements: [view.playlist_id, result.id, view.genre_id] };
-    //   return db.db.query(queryToPlaylistView, dataForView);
-    // })
-    // .then((view) => console.log('done adding to playlist view', view))
-    // .catch(err => console.log('error adding to playlist view', err));
-}
+  const queryToPlaylistView = 'insert into playlist_views ("playlist_id", s"logId", "genre_id", "createdAt", "updatedAt") values (?, ?, ?, ?, ?)';
+  const dataForView = {
+    replacements: [
+      view.playlist_id,
+      view.id,
+      view.genre_id
+    ]
+  };
+  return db.query(queryToPlaylistView, dataForView, callback);
+};
 
+const addToSongResponse = () => {
+
+};
+
+const addToSongReactions = () => {
+
+};
+
+const getPlaylistViews = () => {
+
+};
+
+const getSongReactions = () => {
+
+};
+
+const getSongResponses = () => {
+
+};
 
 module.exports = {
-  addToPlayListView
+  addToLogs,
+  addToPlayListView,
+  addToSongReactions,
+  addToSongResponse,
+  getPlaylistViews,
+  getSongReactions,
+  getSongResponses
 };

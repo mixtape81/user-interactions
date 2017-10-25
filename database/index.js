@@ -1,9 +1,8 @@
-const environment = process.env.NODE_ENV;
-const envPath = `.env.${environment}`;
-const env_Vars = require('dotenv').config({ path: envPath });
-
-console.log('Current database environment: ', environment);
+const env = require('../server/environment.js');
 const Sequelize = require('sequelize');
+
+console.log('environment in db', process.env.NODE_ENV);
+// console.log('Current database environment: ', ensvironment);
 
 const config = {
   database: process.env.DB_NAME,
