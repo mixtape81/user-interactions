@@ -1,9 +1,7 @@
-const environment = process.env.NODE_ENV;
-const envPath = `.env.${environment}`;
-const env_Vars = require('dotenv').config({ path: envPath });
-
-console.log('Current database environment: ', environment);
+const env = require('../server/environment.js');
 const Sequelize = require('sequelize');
+
+console.log('environment in db', env.ENV_PATH);
 
 const config = {
   database: process.env.DB_NAME,
@@ -107,14 +105,14 @@ SongReaction.belongsTo(Log);
 Log.hasMany(SongResponse);
 SongResponse.belongsTo(Log);
 
-EventType.sync()
-  .then(() => Session.sync())
-  .then(() => Log.sync())
-  .then(() => PlaylistView.sync())
-  .then(() => Search.sync())
-  .then(() => SongReaction.sync())
-  .then(() => SongResponse.sync())
-  .catch(err => console.log('error syncing schema tables', err));
+// EventType.sync()
+//   .then(() => Session.sync())
+//   .then(() => Log.sync())
+//   .then(() => PlaylistView.sync())
+//   .then(() => Search.sync())
+//   .then(() => SongReaction.sync())
+//   .then(() => SongResponse.sync())
+//   .catch(err => console.log('error syncing schema tables', err));
 
 module.exports = {
   db,

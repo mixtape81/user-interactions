@@ -11,4 +11,3 @@ before_script:
 
 scripts:
   npm run test
-  npm run test-db-travis

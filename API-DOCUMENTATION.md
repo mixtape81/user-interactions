@@ -17,8 +17,8 @@
 |--------------|----------------------------------------------|
 |id            |integer, auto increasing                      |
 |playlist_id   |integer, id of playlist viewed                |
-|user_id       |integer, id of user who viewed playlist       |
 |genre_id      |integer, id of genre that playlist belongs to |
+|logId         |integer, id log for this event                |
 
 
 **Sessions**
@@ -37,8 +37,8 @@
 |id            |integer, auto increasing                      |
 |song_id       |integer, id of song                           |
 |playlist_id   |integer, id of playlist of song               |
-|user_id       |integer, id of user who reacted to song       |
 |genre_id      |integer, id of genre that song belongs to     |
+|logId         |integer, id log for this event                |
 |liked         |boolean/NULL, (true/false) (likes/dislikes)   |
 
 
@@ -49,8 +49,9 @@
 |id            |integer, auto increasing                      |
 |song_id       |integer, id of song                           |
 |playlist_id   |integer, id of playlist of song               |
-|user_id       |integer, id of user who responsded            |
 |listenedTo    |boolean, true/false (song heard/skipped)      |
+|logId         |integer, id log for this event                |
+
 
 
 **Search**
@@ -60,6 +61,8 @@
 |id            |integer, auto increasing                      |
 |value         |string, defines term that was searched        |
 |user_id       |integer, id of user who searched              |
+|logId         |integer, id log for this event                |
+
 
 
 **Logs**
@@ -69,7 +72,6 @@
 |id            |integer, auto increasing                      |
 |event_id      |integer, foreign key - events table           |
 |session_id    |integer, foreign key - sessions table         |
-|interaction_id|integer, foreign key - specific event table   | 
 |user_id       |integer, id of user who triggered event       |
 
 
@@ -90,14 +92,71 @@ request.get('/playlistviews');
 [
   {
     playlist_id: 1,
-    created_at: "2017-10-04T22:46:20.345Z",
-    updated_at: "2017-10-04T22:46:20.345Z",
+    createdAt: "2017-10-04T22:46:20.345Z",
+    updatedAt: "2017-10-04T22:46:20.345Z",
     genre_id: 2
     },
   {
     playlist_id: 2,
-    created_at: "2017-10-04T22:46:20.361Z",
-    updated_at: "2017-10-04T22:46:20.361Z",
+    createdAt: "2017-10-04T22:46:20.361Z",
+    updatedAt: "2017-10-04T22:46:20.361Z",
     genre_id: 3
   }
 ]
+
+```
+
+### /songresponses
+
+**will respond with all playlist and song heard/skipped for that day**
+
+GET request to '/songresponses' will return an array of objects that will include the playlist_id, genre_id and and a songs array that will include all the songs interacted with on that day
+
+Example:
+
+```
+
+request.get('/songresponses');
+
+//response
+
+[
+  {
+    playlist_id: 1,
+    genre_id: 5
+    songs: [
+      {
+        song_id: 1,
+        listenedTo: true,
+        createdAt: "2017-10-04T22:46:20.345Z",
+        updatedAt: "2017-10-04T22:46:20.345Z",
+        },
+      {
+        song_id: 2,
+        listenedTo: false,
+        createdAt: "2017-10-04T22:46:20.345Z",
+        updatedAt: "2017-10-04T22:46:20.345Z",
+      }
+    ]
+  },
+  {
+    playlist_id: 1,
+    genre_id: 5
+    songs: [
+      {
+        song_id: 1,
+        listenedTo: true,
+        createdAt: "2017-10-04T22:46:20.345Z",
+        updatedAt: "2017-10-04T22:46:20.345Z",
+        },
+      {
+        song_id: 2,
+        listenedTo: false,
+        createdAt: "2017-10-04T22:46:20.345Z",
+        updatedAt: "2017-10-04T22:46:20.345Z",
+      }
+    ]
+  }
+]
+
+```

@@ -4,11 +4,10 @@
   "description": "service to store interactions a user has with mix tape",
   "main": "index.js",
   "scripts": {
-    "server-dev": "NODE_ENV=development nodemon --inspect server/index.js",
+    "server-dev": "nodemon --inspect server/index.js",
+    "server-dev-test": "NODE_ENV=test nodemon --inspect server/index.js",
     "test": "NODE_ENV=travis mocha --reporter nyan tests/server-spec.js --exit",
-    "test-db-travis": "NODE_ENV=travis mocha tests/database-spec.js --exit",
-    "test-dev": "NODE_ENV=test mocha --reporter nyan tests/server-spec.js --exit",
-    "test-db": "NODE_ENV=test mocha tests/database-spec.js --exit"
+    "test-dev": "NODE_ENV=test mocha --reporter nyan tests/server-spec.js --exit"
   },
   "author": "Neha Chaudhary",
   "license": "ISC",
@@ -25,7 +24,9 @@
     "body-parser": "^1.18.2",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
-    "pg": "^6.4.2",
-    "sequelize": "^4.17.1"
+    "pg": "^7.3.0",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "sequelize": "^4.17.2"
   }
 }

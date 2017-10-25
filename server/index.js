@@ -1,12 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('../database/index.js');
-const dummydata = require('../database/dummyData.js');
-const environment = process.env.NODE_ENV;
-const envPath = `.env.${environment}`;
-const env_Vars = require('dotenv').config({ path: envPath });
+const env = require('./environment.js');
+
 const app = express();
 const port = process.env.PORT;
+const queries = require('../database/queries.js');
 
 
 app.use(bodyParser.json());
@@ -16,18 +14,85 @@ app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
 
-app.post('/dummydata', (req, res) => {
-  dummydata.dropTables()
-    .then(() => dummydata.addEvents())
-    .then(() => dummydata.testRun())
+app.get('/playlistviews', (req, res) => {
+  
+// use this request to send playlist views to analysis
+  res.send();
+});
+
+app.get('/songresponses', (req, res) => {
+// use this request to send songs heard/skipped
+  res.send();
+});
+
+app.get('/songreactions', (req, res) => {
+// use this request to send songs liked/disliked
+  res.send();
+});
+
+
+// app.post('/dummydata', (req, res) => {
+//   dummydata.dropTables()
+//     .then(() => dummydata.addEvents())
+//     .then(() => dummydata.testRun())
+//     .then((result) => {
+//       res.send(result);
+//     })
+//     .catch((err) => {
+//       res.status(400).send(err);
+//     });
+// });
+
+app.post('/view', (req, res) => {
+  queries.addToLogs(req.body)
     .then((result) => {
-      // console.log('RREESSULLTT', result);
-      res.send('OK');
+      req.body.logId = result.id;
+      return queries.addToPlaylistView(req.body);
+    })
+    .then((result) => {
+      res.send(result.dataValues);
     })
     .catch((err) => {
-      // console.log('error during dummy data', err);
-      res.status(400).send('FAILED');
+      res.status(400).send(err);
     });
+});
+
+app.post('/search', (req, res) => {
+  queries.addToLogs(req.body)
+    .then((result) => {
+      req.body.logId = result.id;
+      return queries.addToSearch(req.body);
+    })
+    .then((result) => {
+      res.send(result.dataValues);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+});
+
+app.post('/songreaction', (req, res) => {
+  queries.addToLogs(req.body)
+    .then((result) => {
+      req.body.logId = result.id;
+      return queries.addToSongReactions(req.body);
+    })
+    .then((result) => {
+      res.send(result.dataValues);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+});
+
+app.post('/songresponse', (req, res) => {
+  queries.addToLogs(req.body)
+    .then((result) => {
+      req.body.logId = result.id;
+      return queries.addToSongResponses(req.body);
+    })
+    .then(result => res.send(result.dataValues))
+    .catch(err => res.status(400).send(err));
 });
 
 app.listen(port, () => {
