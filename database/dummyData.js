@@ -1,4 +1,7 @@
 const db = require('./index.js');
+const queries = require('./queries.js');
+const random = require('./data-generator.js');
+const rp = require('request-promise');
 
 const dropTables = () => (db.EventType.sync({ force: true })
   .then(() => db.Search.sync({ force: true }))
@@ -30,8 +33,29 @@ const testRun = () => (db.Session.create({ user_id: 10, hash: '3232432' })
   // .catch(err => console.log('error test runnnnnnnnnnnn', err))
 );
 
+const addToViewTest = () => {
+  const view = {
+    playlist_id: random.generateRandomPlaylistId(),
+    genre_id: random.generateRandomGenreId(),
+    userId: random.generateRandomUserId(),
+    sessionId: random.generateRandomSession(),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  const options = {
+    method: 'POST',
+    uri: `${process.env.HOSTNAME}/view`,
+    body: view,
+    contentType: 'application/json',
+    json: true
+  };
+  return rp(options);
+};
+
+
 module.exports = {
   dropTables,
   addEvents,
-  testRun
+  testRun,
+  addToViewTest
 };
