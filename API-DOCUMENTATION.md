@@ -103,3 +103,60 @@ request.get('/playlistviews');
     genre_id: 3
   }
 ]
+
+```
+
+### /songresponses
+
+**will respond with all playlist and song heard/skipped for that day**
+
+GET request to '/songresponses' will return an array of objects that will include the playlist_id, genre_id and and a songs array that will include all the songs interacted with on that day
+
+Example:
+
+```
+
+request.get('/songresponses');
+
+//response
+
+[
+  {
+    playlist_id: 1,
+    genre_id: 5
+    songs: [
+      {
+        song_id: 1,
+        listenedTo: true,
+        createdAt: "2017-10-04T22:46:20.345Z",
+        updatedAt: "2017-10-04T22:46:20.345Z",
+        },
+      {
+        song_id: 2,
+        listenedTo: false,
+        createdAt: "2017-10-04T22:46:20.345Z",
+        updatedAt: "2017-10-04T22:46:20.345Z",
+      }
+    ]
+  },
+  {
+    playlist_id: 1,
+    genre_id: 5
+    songs: [
+      {
+        song_id: 1,
+        listenedTo: true,
+        createdAt: "2017-10-04T22:46:20.345Z",
+        updatedAt: "2017-10-04T22:46:20.345Z",
+        },
+      {
+        song_id: 2,
+        listenedTo: false,
+        createdAt: "2017-10-04T22:46:20.345Z",
+        updatedAt: "2017-10-04T22:46:20.345Z",
+      }
+    ]
+  }
+]
+
+```

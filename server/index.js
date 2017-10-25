@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const env = require('./environment.js');
 const dummydata = require('../database/dummyData.js');
 
-console.log('environment in server', env.environment);
+console.log('environment in server', env.ENV_PATH);
 
 const app = express();
 const port = process.env.PORT;
@@ -23,8 +23,13 @@ app.get('/playlistviews', (req, res) => {
   res.send();
 });
 
-app.get('/songsresponses', (req, res) => {
+app.get('/songresponses', (req, res) => {
 // use this request to send songs heard/skipped
+  res.send();
+});
+
+app.get('/songreactions', (req, res) => {
+// use this request to send songs liked/disliked
   res.send();
 });
 
@@ -35,7 +40,7 @@ app.post('/dummydata', (req, res) => {
     .then(() => dummydata.testRun())
     .then((result) => {
       console.log('RREESSULLTT', result);
-      res.send('OK');
+      res.send(result);
     })
     .catch((err) => {
       console.log('error during dummy data', err);
@@ -43,32 +48,72 @@ app.post('/dummydata', (req, res) => {
     });
 });
 
-let count = 0;
 app.post('/view', (req, res) => {
-  // console.log('received request', req.body);
-  queries.addToPlayListView(req.body, (err, results) => {
-    if (err) {
-      console.log('err while adding, in callbakc', err);
-      res.status(400).send('FFAIILLLLEEDD');
-    } else {
-      console.log('result after adding to queries', results);
-      res.send(`OK${++count}`);
-    }
-  });
+  queries.addToLogs(req.body)
+    .then((result) => {
+      req.body.logId = result.id;
+      return queries.addToPlaylistView(req.body);
+    })
+    .then((result) => {
+      console.log('added to playlistview', result);
+      res.send('OK MAGIC HAPPENDED!');
+    })
+    .catch((err) => {
+      console.log('errror adding to logs', err);
+      res.status(400).send('FAILED TO ADD TO LOGS');
+    });
 });
-  // console.log('result', result);
-// .then(() => {
-//   console.log('DooooooonnnnnnnNNNNEEEEEEEEEEE', result);
-//   res.send('OK');
-// })
-// .catch((err) => {
-//   console.log('error during dummy data', err);
-//   res.status(400).send('FAILED to add to view');
-// });
-// });
+
+app.post('/search', (req, res) => {
+  queries.addToLogs(req.body)
+    .then((result) => {
+      req.body.logId = result.id;
+      return queries.addToSearch(req.body);
+    })
+    .then((result) => {
+      console.log('added to search', result);
+      res.send('OK MAGIC HAPPENDED!');
+    })
+    .catch((err) => {
+      console.log('errror adding to search', err);
+      res.status(400).send('FAILED TO ADD TO LOGS');
+    });
+});
+
+app.post('/songreaction', (req, res) => {
+  queries.addToLogs(req.body)
+    .then((result) => {
+      req.body.logId = result.id;
+      return queries.addToSongReactions(req.body);
+    })
+    .then((result) => {
+      console.log('added to song reactions', result);
+      res.send('OK MAGIC HAPPENDED!');
+    })
+    .catch((err) => {
+      console.log('errror adding to reactions', err);
+      res.status(400).send('FAILED TO ADD TO LOGS');
+    });
+});
+
+app.post('/songresponse', (req, res) => {
+  queries.addToLogs(req.body)
+    .then((result) => {
+      req.body.logId = result.id;
+      return queries.addToSongResponses(req.body);
+    })
+    .then((result) => {
+      console.log('added to song responses', result);
+      res.send('OK MAGIC HAPPENDED!');
+    })
+    .catch((err) => {
+      console.log('errror adding to responses', err);
+      res.status(400).send('FAILED TO ADD TO LOGS');
+    });
+});
 
 app.listen(port, () => {
-  // console.log(`Listening on port ${port}`);
+  console.log(`Listening on port ${port}`);
 });
 
 module.exports = {

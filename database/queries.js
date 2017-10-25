@@ -1,57 +1,38 @@
-const { db } = require('./index.js');
+const db = require('./index.js');
 
-const addToLogs = (action) => {
-  const queryToLogs = 'insert into logs ("eventTypeId", "user_id", "sessionId", "createdAt", "updatedAt") values (?, ?, ?, ?, ?)';
-  const dataForLogs = {
-    replacements: [
-      1,
-      action.userId,
-      action.sessionId,
-      action.createdAt,
-      action.updatedAt
-    ]
-  };
-  return db.query(queryToLogs, dataForLogs).spread();
-};
+const addToLogs = action => db.Log.create(action);
+// const queryToLogs = 'insert into logs ("eventTypeId", "user_id", "sessionId",
+// "createdAt", "updatedAt") values (?, ?, ?, ?, ?)';
 
-const addToPlayListView = (view, callback) => {
-  const queryToPlaylistView = 'insert into playlist_views ("playlist_id", s"logId", "genre_id", "createdAt", "updatedAt") values (?, ?, ?, ?, ?)';
-  const dataForView = {
-    replacements: [
-      view.playlist_id,
-      view.id,
-      view.genre_id
-    ]
-  };
-  return db.query(queryToPlaylistView, dataForView, callback);
-};
+const addToPlaylistView = view => db.PlaylistView.create(view);
+// const queryToPlaylistView = 'insert into playlist_views
+// ("playlist_id", s"logId", "genre_id", "createdAt", "updatedAt") values (?, ?, ?, ?, ?)';
 
-const addToSongResponse = () => {
+const addToSearch = search => db.Search.create(search);
 
-};
+const addToSongResponses = response => db.SongResponse.create(response);
 
-const addToSongReactions = () => {
+const addToSongReactions = reaction => db.SongReaction.create(reaction);
 
-};
+const getPlaylistViews = playlistId => (
+  db.PlaylistView.findAll({ where: { playlist_id: playlistId } })
+);
 
-const getPlaylistViews = () => {
+const getSongReactions = playlistId => (
+  db.SongReaction.findAll({ where: { playlist_id: playlistId } })
+);
 
-};
-
-const getSongReactions = () => {
-
-};
-
-const getSongResponses = () => {
-
-};
+const getSongResponses = playlistId => (
+  db.SongResonse.findAll({ where: { playlist_id: playlistId } })
+);
 
 module.exports = {
   addToLogs,
-  addToPlayListView,
+  addToPlaylistView,
   addToSongReactions,
-  addToSongResponse,
+  addToSongResponses,
   getPlaylistViews,
   getSongReactions,
-  getSongResponses
+  getSongResponses,
+  addToSearch
 };

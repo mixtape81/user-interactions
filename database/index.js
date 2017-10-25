@@ -1,8 +1,7 @@
 const env = require('../server/environment.js');
 const Sequelize = require('sequelize');
 
-console.log('environment in db', process.env.NODE_ENV);
-// console.log('Current database environment: ', ensvironment);
+console.log('environment in db', env.ENV_PATH);
 
 const config = {
   database: process.env.DB_NAME,

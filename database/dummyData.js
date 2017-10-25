@@ -36,29 +36,30 @@ const testRun = () => (db.Session.create({ user_id: 10, hash: '3232432' })
   // .catch(err => console.log('error test runnnnnnnnnnnn', err))
 );
 
-const addToViewTest = () => {
-  const view = {
-    playlist_id: random.generateRandomPlaylistId(),
-    genre_id: random.generateRandomGenreId(),
-    userId: random.generateRandomUserId(),
-    sessionId: random.generateRandomSession(),
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-  const options = {
-    method: 'POST',
-    uri: `${process.env.HOSTNAME}/view`,
-    body: view,
-    contentType: 'application/json',
-    json: true
-  };
-  return rp(options);
-};
+// const addToViewTest = () => {
+//   const view = {
+//     // playlist_id: random.generateRandomPlaylistId(),
+//     // genre_id: random.generateRandomGenreId(),
+//     userId: random.generateRandomUserId(),
+//     sessionId: random.generateRandomSession(),
+//     eventTypeId: 1
+//     // createdAt: new Date(),
+//     // updatedAt: new Date()
+//   };
+//   const options = {
+//     method: 'POST',
+//     uri: `${process.env.HOSTNAME}/view`,
+//     body: view,
+//     contentType: 'application/json',
+//     json: true
+//   };
+//   return rp(options);
+// };
 
 
 module.exports = {
   dropTables,
   addEvents,
   testRun,
-  addToViewTest
+  // addToViewTest
 };

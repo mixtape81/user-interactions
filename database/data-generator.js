@@ -27,27 +27,26 @@
 
 // else if they search
 
+const genres = ['Rock and Roll', 'Folk', 'Country Western', 'Classical', 'Reggaeton', 'Jazz', 'Mixed', 'Blues', 'Disco', 'Metal'];
 
-const generateRandomPlaylistId = () => (
-  Math.floor(Math.random() * 20) + 1
-);
+const generateRandomPlaylistId = () => Math.floor(Math.random() * 20) + 1;
 
-const generateRandomGenreId = () => (
-  Math.floor(Math.random() * 10) + 1
-);
+const generateRandomGenreId = () => Math.floor(Math.random() * 10) + 1;
 
-const generateRandomUserId = () => (
-  Math.floor(Math.random() * 10000000) + 1
-);
+const generateRandomSongId = () => Math.floor(Math.random() * 10000000) + 1;
 
-const generateRandomSession = () => (
-  Math.floor(Math.random() * 1000000) + 1
-);
+const generateRandomUserId = () => Math.floor(Math.random() * 10000000) + 1;
+
+const generateRandomSession = () => Math.floor(Math.random() * 1000000) + 1;
+
+const generateRandomSearch = () => genres[Math.floor(Math.random() * 10)];
 
 
 module.exports = {
   generateRandomPlaylistId,
   generateRandomUserId,
   generateRandomGenreId,
-  generateRandomSession
+  generateRandomSession,
+  generateRandomSearch,
+  generateRandomSongId
 };
