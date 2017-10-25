@@ -105,14 +105,14 @@ SongReaction.belongsTo(Log);
 Log.hasMany(SongResponse);
 SongResponse.belongsTo(Log);
 
-EventType.sync()
-  .then(() => Session.sync())
-  .then(() => Log.sync())
-  .then(() => PlaylistView.sync())
-  .then(() => Search.sync())
-  .then(() => SongReaction.sync())
-  .then(() => SongResponse.sync())
-  .catch(err => console.log('error syncing schema tables', err));
+// EventType.sync()
+//   .then(() => Session.sync())
+//   .then(() => Log.sync())
+//   .then(() => PlaylistView.sync())
+//   .then(() => Search.sync())
+//   .then(() => SongReaction.sync())
+//   .then(() => SongResponse.sync())
+//   .catch(err => console.log('error syncing schema tables', err));
 
 module.exports = {
   db,

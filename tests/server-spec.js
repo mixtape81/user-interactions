@@ -1,7 +1,7 @@
 const env = require('../server/environment.js');
-const Sequelize = require('sequelize');
 const supertest = require('supertest');
 const { expect } = require('chai');
+
 const { app } = require('../server/index.js');
 const request = supertest.agent(app);
 const { db } = require('../database/index.js');
@@ -49,8 +49,12 @@ describe('Execute queries accurately', () => {
     request
       .post('/view')
       .send(view)
-      .set('contentType', 'application/json')
-      .expect(200, done);
+      .then((result) => {
+        expect(result.body.genre_id).to.equal(view.genre_id);
+        expect(result.body.logId).to.exist;
+        expect(result.statusCode).to.equal(200);
+        done();
+      });
   });
 
   it('should add searched terms to search table', (done) => {
@@ -63,8 +67,12 @@ describe('Execute queries accurately', () => {
     request
       .post('/search')
       .send(searched)
-      .set('contentType', 'application/json')
-      .expect(200, done);
+      .then((result) => {
+        expect(result.body.value).to.equal(searched.value);
+        expect(result.body.logId).to.exist;
+        expect(result.statusCode).to.equal(200);
+        done();
+      });
   });
 
   it('should add song responses to song responses table', (done) => {
@@ -80,8 +88,13 @@ describe('Execute queries accurately', () => {
     request
       .post('/songresponse')
       .send(response)
-      .set('contentType', 'application/json')
-      .expect(200, done);
+      .then((result) => {
+        expect(result.body.song_id).to.equal(response.song_id);
+        expect(result.body.playlist_id).to.equal(response.playlist_id);
+        expect(result.body.logId).to.exist;
+        expect(result.statusCode).to.equal(200);
+        done();
+      });
   });
 
   it('should add song reactions to the song reactions table', (done) => {
@@ -97,7 +110,12 @@ describe('Execute queries accurately', () => {
     request
       .post('/songreaction')
       .send(reaction)
-      .set('contentType', 'application/json')
-      .expect(200, done);
+      .then((result) => {
+        expect(result.body.song_id).to.equal(reaction.song_id);
+        expect(result.body.playlist_id).to.equal(reaction.playlist_id);
+        expect(result.body.logId).to.exist;
+        expect(result.statusCode).to.equal(200);
+        done();
+      });
   });
 });
