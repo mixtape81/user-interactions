@@ -1,7 +1,7 @@
-const env = require('../server/environment.js');
+require('../server/environment.js');
 const Sequelize = require('sequelize');
 
-console.log('environment in db', env.ENV_PATH);
+// console.log('environment in db', env.ENV_PATH);
 
 const config = {
   database: process.env.DB_NAME,
@@ -13,7 +13,6 @@ const config = {
 const db = new Sequelize(config);
 
 db.authenticate()
-  .then(() => console.log('Connection has been established successfully.'))
   .catch(err => console.error('Unable to connect to the database:', err));
 
 const EventType = db.define('event_type', {

@@ -1,3 +1,4 @@
+// organizes songs by playlist
 const organizeSongsByPlaylist = (songs) => {
   const sorted = [];
   for (let i = 1; i < 21; i += 1) {

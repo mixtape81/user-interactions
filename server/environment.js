@@ -1,3 +1,4 @@
+// this file defines the environment variables
 const dotenv = require('dotenv');
 
 const environment = process.env.NODE_ENV;

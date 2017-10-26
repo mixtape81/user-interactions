@@ -1,5 +1,6 @@
 const db = require('./index.js');
 
+// events array
 const events = [
   { type: 'playlist_views' },
   { type: 'search' },
@@ -7,6 +8,7 @@ const events = [
   { type: 'song_responses' }
 ];
 
+// drops all tables in database when needed
 const dropTables = () => (db.EventType.sync({ force: true })
   .then(() => db.Search.sync({ force: true }))
   .then(() => db.SongResponse.sync({ force: true }))
@@ -17,6 +19,7 @@ const dropTables = () => (db.EventType.sync({ force: true })
   .catch(err => console.log('error for syncing tables', err))
 );
 
+// adds event types to the database after database is dropped
 const addEvents = () => (db.EventType.bulkCreate(events)
   .catch(err => console.log('error adding events to database', err))
 );

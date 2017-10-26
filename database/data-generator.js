@@ -1,17 +1,8 @@
-//  Data to generate
-// Platlist id between 1-20
-// song ids between 1 - 10,000,000
-// user ids between 1- 10,000,000
-// booleans for likes/dislikes/heard/skipped
-// an array of search terms
+
 
 // start from august first
-// a cron job that runs every minute
-// assume  that is adds a 100000 behaviour points every minute;
-// every hour that is 60000;
-// need to do it 16-18 hours
-// every minute it should increment time
-
+// a cron job that runs every minute ??
+// run every 5 minutes ??
 
 // user comes in
 // first thing to do is check their session
