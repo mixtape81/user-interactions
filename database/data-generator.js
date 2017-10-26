@@ -18,6 +18,23 @@
 
 // else if they search
 
+const generateRandomEndTime = () => {
+  const sessionTime = Math.floor(Math.random() * 60) * 600000;
+  const time = Date.now();
+  return time + sessionTime;
+};
+
+const generateRandomUserId = () => Math.floor(Math.random() * 10000000) + 1;
+const generateRandomSession = () => { hash: `${generateRandomUserId()}--${Date.now()}--${generateRandomEndTime()}`};
+// create 500 random sessions;
+// assign to random user
+// make session objects with start and end session time
+// const sessions = [];
+// for (let i = 0; i < 500; i += 1) {
+//   sessions.push({ hash: `${generateRandomUserId()}--${Date.now()}--${generateRandomEndTime()}` });
+// }
+// return sessions;
+
 const genres = ['Rock and Roll', 'Folk', 'Country Western', 'Classical', 'Reggaeton', 'Jazz', 'Mixed', 'Blues', 'Disco', 'Metal'];
 
 const generateRandomPlaylistId = () => Math.floor(Math.random() * 20) + 1;
@@ -26,9 +43,7 @@ const generateRandomGenreId = () => Math.floor(Math.random() * 10) + 1;
 
 const generateRandomSongId = () => Math.floor(Math.random() * 10000000) + 1;
 
-const generateRandomUserId = () => Math.floor(Math.random() * 10000000) + 1;
-
-const generateRandomSession = () => Math.floor(Math.random() * 1000000) + 1;
+// const generateRandomSession = () => Math.floor(Math.random() * 1000000) + 1;
 
 const generateRandomSearch = () => genres[Math.floor(Math.random() * 10)];
 
@@ -39,5 +54,6 @@ module.exports = {
   generateRandomGenreId,
   generateRandomSession,
   generateRandomSearch,
-  generateRandomSongId
+  generateRandomSongId,
+  generateRandomEndTime
 };

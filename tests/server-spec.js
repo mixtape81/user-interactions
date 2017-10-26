@@ -53,7 +53,8 @@ describe('Execute queries accurately', () => {
         expect(result.body.logId).to.exist;
         expect(result.statusCode).to.equal(200);
         done();
-      });
+      })
+      .catch(err => console.log('err in add to playlist views', err));
   });
 
   it('should add searched terms to search table', (done) => {
@@ -71,7 +72,8 @@ describe('Execute queries accurately', () => {
         expect(result.body.logId).to.exist;
         expect(result.statusCode).to.equal(200);
         done();
-      });
+      })
+      .catch(err => console.log('err in add to search', err));
   });
 
   it('should add song responses to song responses table', (done) => {
@@ -93,7 +95,8 @@ describe('Execute queries accurately', () => {
         expect(result.body.logId).to.exist;
         expect(result.statusCode).to.equal(200);
         done();
-      });
+      })
+      .catch(err => console.log('err in add to song responses', err));
   });
 
   it('should add song reactions to the song reactions table', (done) => {
@@ -115,7 +118,8 @@ describe('Execute queries accurately', () => {
         expect(result.body.logId).to.exist;
         expect(result.statusCode).to.equal(200);
         done();
-      });
+      })
+      .catch(err => console.log('err in add to song reactions', err));
   });
 
   it('should get all playlist views for a given day', (done) => {
