@@ -1,11 +1,10 @@
 require('../server/environment.js');
 const supertest = require('supertest');
-const random = require('../database/data-generator.js');
 const { expect } = require('chai');
-const { app } = require('../server/index.js').app;
-
+const { app } = require('../server/index.js');
 const request = supertest.agent(app);
 // const { db } = require('../database/index.js');
+const random = require('../database/data-generator.js');
 
 describe('server connection test', () => {
   beforeEach(() => {
