@@ -1,7 +1,7 @@
-const env = require('../server/environment.js');
+require('../server/environment.js');
 const Sequelize = require('sequelize');
 
-console.log('environment in db', env.ENV_PATH);
+// console.log('environment in db', env.ENV_PATH);
 
 const config = {
   database: process.env.DB_NAME,
@@ -13,7 +13,6 @@ const config = {
 const db = new Sequelize(config);
 
 db.authenticate()
-  .then(() => console.log('Connection has been established successfully.'))
   .catch(err => console.error('Unable to connect to the database:', err));
 
 const EventType = db.define('event_type', {
@@ -41,7 +40,8 @@ const Log = db.define('log', {
     primaryKey: true,
     autoIncrement: true
   },
-  user_id: Sequelize.INTEGER
+  user_id: Sequelize.INTEGER,
+  date: Sequelize.DATEONLY
 });
 
 const PlaylistView = db.define('playlist_view', {
@@ -51,7 +51,8 @@ const PlaylistView = db.define('playlist_view', {
     autoIncrement: true
   },
   playlist_id: Sequelize.INTEGER,
-  genre_id: Sequelize.INTEGER
+  genre_id: Sequelize.INTEGER,
+  date: Sequelize.DATEONLY
 });
 
 const Search = db.define('search', {
@@ -60,7 +61,8 @@ const Search = db.define('search', {
     primaryKey: true,
     autoIncrement: true
   },
-  value: Sequelize.STRING
+  value: Sequelize.STRING,
+  date: Sequelize.DATEONLY
 });
 
 const SongReaction = db.define('song_reaction', {
@@ -72,7 +74,8 @@ const SongReaction = db.define('song_reaction', {
   song_id: Sequelize.INTEGER,
   liked: Sequelize.BOOLEAN,
   playlist_id: Sequelize.INTEGER,
-  genre_id: Sequelize.INTEGER
+  genre_id: Sequelize.INTEGER,
+  date: Sequelize.DATEONLY
 });
 
 const SongResponse = db.define('song_response', {
@@ -84,7 +87,8 @@ const SongResponse = db.define('song_response', {
   song_id: Sequelize.INTEGER,
   listenedTo: Sequelize.BOOLEAN,
   playlist_id: Sequelize.INTEGER,
-  genre_id: Sequelize.INTEGER
+  genre_id: Sequelize.INTEGER,
+  date: Sequelize.DATEONLY
 });
 
 EventType.hasMany(Log);
@@ -116,6 +120,7 @@ SongResponse.belongsTo(Log);
 
 module.exports = {
   db,
+  Sequelize,
   EventType,
   Session,
   Log,
