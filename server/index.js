@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // add a date for all post requests
 app.use((req, res, next) => {
   if (req.method === 'POST') {
-    req.body.date = new Date();
+    req.body.date = req.body.date ? req.body.date : new Date();
   }
   next();
 });
