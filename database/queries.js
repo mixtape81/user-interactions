@@ -14,17 +14,11 @@ const addToSongResponses = response => db.SongResponse.create(response);
 
 const addToSongReactions = reaction => db.SongReaction.create(reaction);
 
-const getPlaylistViews = playlistId => (
-  db.PlaylistView.findAll({ where: { playlist_id: playlistId } })
-);
+const getPlaylistViews = date => db.PlaylistView.findAll({ where: { date } });
 
-const getSongReactions = playlistId => (
-  db.SongReaction.findAll({ where: { playlist_id: playlistId } })
-);
+const getSongReactions = date => db.SongReaction.findAll({ where: { date } });
 
-const getSongResponses = playlistId => (
-  db.SongResonse.findAll({ where: { playlist_id: playlistId } })
-);
+const getSongResponses = date => db.SongResponse.findAll({ where: { date } });
 
 module.exports = {
   addToLogs,

@@ -1,11 +1,11 @@
-const env = require('../server/environment.js');
+require('../server/environment.js');
 const supertest = require('supertest');
-const { expect } = require('chai');
-
-const { app } = require('../server/index.js');
-const request = supertest.agent(app);
-const { db } = require('../database/index.js');
 const random = require('../database/data-generator.js');
+const { expect } = require('chai');
+const { app } = require('../server/index.js').app;
+
+const request = supertest.agent(app);
+// const { db } = require('../database/index.js');
 
 describe('server connection test', () => {
   beforeEach(() => {
@@ -117,5 +117,77 @@ describe('Execute queries accurately', () => {
         expect(result.statusCode).to.equal(200);
         done();
       });
+  });
+
+  it('should get all playlist views for a given day', (done) => {
+    const time = new Date();
+    const date = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+    request
+      .get(`/playlistviews?date=${date}`)
+      .then((result) => {
+        expect(result.body.length).to.not.equal(0);
+        expect(result.statusCode).to.equal(200);
+        done();
+      })
+      .catch(err => console.log('err in test for GET views', err));
+  });
+
+  it('should not return any playlists if date does not match', (done) => {
+    request
+      .get('/playlistviews?date=2010-10-25')
+      .then((result) => {
+        expect(result.body.length).to.equal(0);
+        expect(result.statusCode).to.equal(200);
+        done();
+      })
+      .catch(err => console.log('err in test for GET views (emtpty)', err));
+  });
+
+  it('should get all song responses views for a given day', (done) => {
+    const time = new Date();
+    const date = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+    request
+      .get(`/songresponses?date=${date}`)
+      .then((result) => {
+        expect(result.body.length).to.not.equal(0);
+        expect(result.statusCode).to.equal(200);
+        done();
+      })
+      .catch(err => console.log('err in test for GET song responses', err));
+  });
+
+  it('should not return any song responses if date does not match', (done) => {
+    request
+      .get('/songresponses?date=2010-10-25')
+      .then((result) => {
+        expect(result.body.length).to.equal(0);
+        expect(result.statusCode).to.equal(200);
+        done();
+      })
+      .catch(err => console.log('err in test for GET song responses (empty)', err));
+  });
+
+  it('should get all song reactions views for a given day', (done) => {
+    const time = new Date();
+    const date = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+    request
+      .get(`/songreactions?date=${date}`)
+      .then((result) => {
+        expect(result.body.length).to.not.equal(0);
+        expect(result.statusCode).to.equal(200);
+        done();
+      })
+      .catch(err => console.log('err in test for GET song reactions', err));
+  });
+
+  it('should not return any song reactions if date does not match', (done) => {
+    request
+      .get('/songreactions?date=2010-10-25')
+      .then((result) => {
+        expect(result.body.length).to.equal(0);
+        expect(result.statusCode).to.equal(200);
+        done();
+      })
+      .catch(err => console.log('err in test for GET song reactions (empty)', err));
   });
 });
