@@ -6,12 +6,13 @@ const queries = require('./queries.js');
 let addTime;
 let lastTimeStamp = constants.startInMilliseconds;
 let lastTimeStampPerRound;
+let round = 1;
 
 // this function triggers a playlist view
 const triggerPlaylistView = (session) => {
   // console.log('triggered playlist view with session', session);
   const list = constants.generateRandomPlaylistInfo();
-  const date = constants.parseDate(session);
+  const date = constants.parseDate(lastTimeStamp);
   const query = {
     user_id: session[1],
     sessionId: session[0],
@@ -33,7 +34,7 @@ const triggerPlaylistView = (session) => {
 const triggerSearch = (session) => {
   // console.log('triggered search with session', session);
   const value = constants.genres[constants.generateRandomGenreId() - 1];
-  const date = constants.parseDate(session);
+  const date = constants.parseDate(lastTimeStamp);
   const query = {
     value,
     user_id: session[1],
@@ -54,7 +55,7 @@ const triggerSearch = (session) => {
 const triggerSongReaction = (session) => {
   // console.log('triggered song reaction with session', session);
   const list = constants.generateRandomPlaylistInfo();
-  const date = constants.parseDate(session);
+  const date = constants.parseDate(lastTimeStamp);
   const songReaction = {
     liked: constants.generateBoolean(),
     song_id: constants.generateRandomSongId(),
@@ -75,13 +76,14 @@ const triggerSongReaction = (session) => {
     .catch(err => console.log('error adding song reaction from generator', err));
 };
 
+
 // this function triggers a song response (heard/skippeds)
 const triggerSongResponse = (session) => {
   // console.log('triggered song response with session', session);
   const list = constants.generateRandomPlaylistInfo();
-  const date = constants.parseDate(session);
+  const date = constants.parseDate(lastTimeStamp);
   const songResponse = {
-    liked: constants.generateBoolean(),
+    listenedTo: constants.generateBoolean(),
     song_id: constants.generateRandomSongId(),
     playlist_id: list.playlist,
     user_id: session[1],
@@ -91,6 +93,7 @@ const triggerSongResponse = (session) => {
     date: date.date,
     createdAt: date.createdAt
   };
+  // console.log('song response body', songResponse);
 
   return queries.addToLogs(songResponse)
     .then((log) => {
@@ -138,7 +141,7 @@ const archiveSessions = (active, endpoint = './sessions.txt') => {
 // this function generates a random end time for each session based on
 // its start time (limit: 60 mins)
 const generateRandomEndTime = (start) => {
-  const sessionTime = Math.floor(Math.random() * 60) * 60000;
+  const sessionTime = Math.floor(Math.random() * 120) * 60000;
   const time = start + addTime;
   return time + sessionTime;
 };
@@ -151,16 +154,15 @@ const addRandomTime = () => {
 
 // this function creates 500 random users each time it runs
 const generateRandomSessions = ({ timeStamp, sessionId }) => {
-  console.log('time stampe start create sessions', timeStamp);
-  let start = timeStamp + constants.generateRandomSeconds(15000, 50000);
-  console.log('timestamp', start);
-  const sessionsToGenerate = Math.floor(Math.random() * 300);
+  let start = timeStamp + constants.generateRandomSeconds(100000, 200000);
+  const sessionsToGenerate = constants.averageSessionsPerDay(timeStamp) + Math.floor(Math.random() * 4);
   const sessions = [];
   for (let i = 0; i < sessionsToGenerate; i += 1) {
     const user = constants.generateRandomUserId();
     if (!constants.usersWithSessions[user]) {
       sessions.push(`${sessionId + 1}--${user}--${start + addRandomTime()}--${generateRandomEndTime(start)}`);
-      start += constants.generateRandomSeconds(100, 1000);
+      start = start + addTime + constants.generateRandomSeconds(100, 1000);
+      constants.usersWithSessions[user] = true;
     }
     sessionId += 1;
     lastTimeStamp = start;
@@ -177,6 +179,7 @@ const getLastTimeStampAndSessionId = (session) => {
     timeStamp = Number(sessionDetails[2]);
     sessionId = Number(sessionDetails[0]);
     lastTimeStamp = timeStamp;
+    lastTimeStampPerRound = timeStamp;
   }
   return { timeStamp, sessionId };
 };
@@ -184,10 +187,8 @@ const getLastTimeStampAndSessionId = (session) => {
 // this function finds all the active sessions, and then passes them to triggerEvents.
 const findActiveSessions = (sessions) => {
   let active = sessions ? sessions.split(',') : [];
-  // active = active.filter(session => !(session.match(/\d+/g)[3] < Date.now()));
-  active = active.filter(session => !(session.match(/\d+/g)[3]) < lastTimeStampPerRound);
-  // something wrong with the check for session time for history
   const lastEntry = getLastTimeStampAndSessionId(active[active.length - 1]);
+  active = active.filter(session => (Number(session.match(/\d+/g)[3])) > lastTimeStampPerRound);
   const newSessions = generateRandomSessions(lastEntry);
   active = active.concat(newSessions);
   archiveSessions(active);
@@ -205,13 +206,14 @@ const getSessions = () => {
 };
 
 let catchUpTillDate;
-let round = 1;
 
 const checkTimeForNow = (time) => {
   if (time > Date.now()) {
     clearInterval(catchUpTillDate);
+    process.exit();
   } else {
     console.log(`round number - ${round}`);
+    console.log('last time stamp per round', lastTimeStampPerRound);
     round += 1;
     getSessions();
   }
@@ -220,8 +222,7 @@ const checkTimeForNow = (time) => {
 const addMockData = () => {
   catchUpTillDate = setInterval(() => {
     checkTimeForNow(lastTimeStamp);
-  }, constants.generateRandomSeconds(1000, 10000));
-  // make incrementally larger
+  }, constants.generateRandomSeconds(1000, 2000));
 };
 
 addMockData();
