@@ -72,9 +72,14 @@ const generateRandomIndex = () => Math.floor(Math.random() * 2);
 const generateRandomUserId = () => Math.floor(Math.random() * 25000) + 1;
 
 // this function generates random number of seconds to increment
-const generateRandomSeconds = (start, end) => Math.floor(Math.random * end) + start;
+const generateRandomSeconds = (start, end) => Math.floor(Math.random() * end) + start;
 
-const generateRandomMilliseconds = () => Math.floor(Math.random * 100) + 1;
+const generateRandomMilliseconds = () => Math.floor(Math.random() * 100) + 1;
+
+const parseDate = (date) => {
+  const parsed = new Date(Number(date[2]));
+  return { date: parsed.toLocaleString(), createdAt: parsed.toUTCString() }
+};
 
 const generateRandomPlaylistInfo = () => {
   const genre = generateRandomGenreId();
@@ -101,7 +106,8 @@ module.exports = {
   eventProbabilites,
   generateRandomSeconds,
   generateRandomMilliseconds,
-  startInMilliseconds
+  startInMilliseconds,
+  parseDate
 };
 
 // assuming average range needed is 120000 hits

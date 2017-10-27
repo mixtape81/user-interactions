@@ -11,7 +11,6 @@ const queries = require('../database/queries.js');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 // add a date for all post requests
 app.use((req, res, next) => {
   if (req.method === 'POST') {

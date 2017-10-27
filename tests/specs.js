@@ -6,7 +6,7 @@ const request = supertest.agent(app);
 // const { db } = require('../database/index.js');
 const random = require('../database/data-generator.js');
 const constants = require('../database/data-gen-constants.js');
-const { sessions } = require('../database/dummy.js');
+const { sessions } = require('./dummy-sessions.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -48,12 +48,14 @@ describe('/', () => {
 
 describe('Execute queries accurately', () => {
   it('should add data to playlist views', (done) => {
+    const session = sessions[2].split('--');
     const view = {
       user_id: constants.generateRandomUserId(),
-      sessionId: constants.generateRandomSessionId(),
+      sessionId: Number(session[0]),
       eventTypeId: 1,
       playlist_id: constants.generateRandomPlaylistId(),
-      genre_id: constants.generateRandomGenreId()
+      genre_id: constants.generateRandomGenreId(),
+      createdAt: new Date(Number(session[2])).toUTCString()
     };
     request
       .post('/view')
@@ -68,12 +70,15 @@ describe('Execute queries accurately', () => {
   });
 
   it('should add searched terms to search table', (done) => {
+    const session = sessions[2].split('--');
     const searched = {
       value: constants.generateRandomSearch(),
       user_id: constants.generateRandomUserId(),
-      sessionId: constants.generateRandomSessionId(),
-      eventTypeId: 1
+      sessionId: Number(session[0]),
+      eventTypeId: 1,
+      createdAt: new Date(Number(session[2])).toUTCString()
     };
+    console.log('timestamp', searched.createdAt);
     request
       .post('/search')
       .send(searched)
@@ -87,14 +92,16 @@ describe('Execute queries accurately', () => {
   });
 
   it('should add song responses to song responses table', (done) => {
+    const session = sessions[2].split('--');
     const response = {
       listenedTo: true,
       song_id: constants.generateRandomSongId(),
       playlist_id: constants.generateRandomPlaylistId(),
       user_id: constants.generateRandomUserId(),
-      sessionId: constants.generateRandomSessionId(),
+      sessionId: Number(session[0]),
       eventTypeId: 4,
-      genre_id: constants.generateRandomGenreId()
+      genre_id: constants.generateRandomGenreId(),
+      createdAt: new Date(Number(session[2])).toUTCString()
     };
     request
       .post('/songresponse')
@@ -110,14 +117,16 @@ describe('Execute queries accurately', () => {
   });
 
   it('should add song reactions to the song reactions table', (done) => {
+    const session = sessions[2].split('--');
     const reaction = {
       liked: true,
       song_id: constants.generateRandomSongId(),
       playlist_id: constants.generateRandomPlaylistId(),
       user_id: constants.generateRandomUserId(),
-      sessionId: constants.generateRandomSessionId(),
+      sessionId: Number(session[0]),
       eventTypeId: 3,
-      genre_id: constants.generateRandomGenreId()
+      genre_id: constants.generateRandomGenreId(),
+      createdAt: new Date(Number(session[2])).toUTCString()
     };
     request
       .post('/songreaction')
@@ -206,11 +215,15 @@ describe('Execute queries accurately', () => {
 });
 
 
-// ***************DATA GENERATORS TESTS ********************//
+// ***************DATA GENERATOR TESTS ********************//
 
 describe('Test mock data functions', () => {
   it('should generate a random sessions', (done) => {
-    const sessions = random.generateRandomSessions();
+    const time = {
+      timeStamp: Date.now(),
+      sessionId: 10
+    };
+    const sessions = random.generateRandomSessions(time);
     // expect(constants.sessionId).to.equal(101);
     // expect(sessions.length).to.equal(100);
     expect(sessions[0]).to.have.lengthOf.above(34);
@@ -219,11 +232,19 @@ describe('Test mock data functions', () => {
   });
 
   it('should increment constant sessionId variable', (done) => {
-    const sessions = random.generateRandomSessions();
+    const time = {
+      timeStamp: Date.now(),
+      sessionId: 15
+    };
+    const sessions = random.generateRandomSessions(time);
+    const session1 = Number(sessions[0].split('--')[0]);
+    const session2 = Number(sessions[1].split('--')[0]);
     // expect(constants.sessionId).to.equal(201);
     // expect(sessions.length).to.equal(100);
     expect(sessions[0]).to.have.lengthOf.above(34);
+    expect(sessions[0]).to.have.lengthOf.above(34);
     expect(sessions[0]).to.be.a('string');
+    expect(session2 - session1).to.be.equal(1);
     done();
   });
 
@@ -234,8 +255,8 @@ describe('Test mock data functions', () => {
   });
 
   it('should read and write sessions to text file', (done) => {
-    random.archiveSessions(sessions);
-    fs.readFile(path.join(__dirname, '../database/sessions.txt'), (err, data) => {
+    random.archiveSessions(sessions, '../tests/sessions-test.txt');
+    fs.readFile(path.join(__dirname, './sessions-test.txt'), (err, data) => {
       if (err) {
         console.log('error while reading file', err);
       } else {
@@ -280,7 +301,6 @@ describe('Test mock data functions', () => {
   it('should add a song reaction to database', (done) => {
     random.triggerSongReaction(sessions[10].split('--'))
       .then((songReaction) => {
-        console.log('log id', songReaction.logId);
         expect(songReaction.logId).to.exist;
         expect(songReaction.id).to.exist;
         done();
@@ -290,7 +310,6 @@ describe('Test mock data functions', () => {
   it('should add a song reaction to database', (done) => {
     random.triggerSongReaction(sessions[5].split('--'))
       .then((songResponse) => {
-        console.log('log id', songResponse.logId);
         expect(songResponse.logId).to.exist;
         expect(songResponse.id).to.exist;
         done();
@@ -298,14 +317,14 @@ describe('Test mock data functions', () => {
   });
 
   it('archieveSessions should rewrite whole file', (done) => {
-    random.archiveSessions('');
+    const testFile = '../tests/sessions-test.txt';
     const batch1 = sessions.slice(0, 4);
     const batch2 = sessions.slice(4, 8);
-    random.archiveSessions(batch1);
-    // console.log('batch2', batch2);
-    random.archiveSessions(batch2);
+    random.archiveSessions(batch1, testFile);
+    console.log('batch2', batch2);
+    random.archiveSessions(batch2, testFile);
     // turn into promise
-    fs.readFile(path.join(__dirname, '../database/sessions.txt'), (err, data) => {
+    fs.readFile(path.join(__dirname, './sessions-test.txt'), (err, data) => {
       if (err) {
         console.log('err getting sessions for archive sessions', err);
       } else {

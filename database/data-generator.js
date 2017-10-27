@@ -5,18 +5,21 @@ const queries = require('./queries.js');
 
 let addTime;
 let lastTimeStamp = constants.startInMilliseconds;
+let lastTimeStampPerRound;
 
 // this function triggers a playlist view
 const triggerPlaylistView = (session) => {
-  console.log('triggered playlist view with session', session);
+  // console.log('triggered playlist view with session', session);
   const list = constants.generateRandomPlaylistInfo();
+  const date = constants.parseDate(session);
   const query = {
     user_id: session[1],
     sessionId: session[0],
     eventTypeId: 1,
     playlist_id: list.playlist,
     genre_id: list.genre,
-    date: new Date()
+    date: date.date,
+    createdAt: date.createdAt
   };
   return queries.addToLogs(query)
     .then((log) => {
@@ -28,14 +31,16 @@ const triggerPlaylistView = (session) => {
 
 // this function triggers a genre searched
 const triggerSearch = (session) => {
-  console.log('triggered search with session', session);
+  // console.log('triggered search with session', session);
   const value = constants.genres[constants.generateRandomGenreId() - 1];
+  const date = constants.parseDate(session);
   const query = {
     value,
     user_id: session[1],
     sessionId: session[0],
     eventTypeId: 2,
-    date: new Date()
+    date: date.date,
+    createdAt: date.createdAt
   };
   return queries.addToLogs(query)
     .then((log) => {
@@ -47,8 +52,9 @@ const triggerSearch = (session) => {
 
 // this function triggers a song reaction (liked/disliked)
 const triggerSongReaction = (session) => {
-  console.log('triggered song reaction with session', session);
+  // console.log('triggered song reaction with session', session);
   const list = constants.generateRandomPlaylistInfo();
+  const date = constants.parseDate(session);
   const songReaction = {
     liked: constants.generateBoolean(),
     song_id: constants.generateRandomSongId(),
@@ -57,7 +63,8 @@ const triggerSongReaction = (session) => {
     sessionId: session[0],
     eventTypeId: 3,
     genre_id: list.playlist,
-    date: new Date()
+    date: date.date,
+    createdAt: date.createdAt
   };
 
   return queries.addToLogs(songReaction)
@@ -70,8 +77,9 @@ const triggerSongReaction = (session) => {
 
 // this function triggers a song response (heard/skippeds)
 const triggerSongResponse = (session) => {
-  console.log('triggered song response with session', session);
+  // console.log('triggered song response with session', session);
   const list = constants.generateRandomPlaylistInfo();
+  const date = constants.parseDate(session);
   const songResponse = {
     liked: constants.generateBoolean(),
     song_id: constants.generateRandomSongId(),
@@ -80,7 +88,8 @@ const triggerSongResponse = (session) => {
     sessionId: session[0],
     eventTypeId: 4,
     genre_id: list.playlist,
-    date: new Date()
+    date: date.date,
+    createdAt: date.createdAt
   };
 
   return queries.addToLogs(songResponse)
@@ -92,7 +101,7 @@ const triggerSongResponse = (session) => {
 };
 
 const triggerSkip = (session) => {
-  console.log('triggered skip for this session', session);
+  // console.log('triggered skip for this session', session);
 };
 
 // this function will initiate a trigger for a specific event for each session
@@ -111,8 +120,8 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
 };
 
 // this function writes current sessions to sessions.txt
-const archiveSessions = (active) => {
-  const file = path.join(__dirname, './sessions.txt');
+const archiveSessions = (active, endpoint = './sessions.txt') => {
+  const file = path.join(__dirname, endpoint);
   fs.truncate(file, (err) => {
     if (err) {
       console.log('error truncating file', err);
@@ -142,7 +151,9 @@ const addRandomTime = () => {
 
 // this function creates 500 random users each time it runs
 const generateRandomSessions = ({ timeStamp, sessionId }) => {
+  console.log('time stampe start create sessions', timeStamp);
   let start = timeStamp + constants.generateRandomSeconds(15000, 50000);
+  console.log('timestamp', start);
   const sessionsToGenerate = Math.floor(Math.random() * 300);
   const sessions = [];
   for (let i = 0; i < sessionsToGenerate; i += 1) {
@@ -154,12 +165,13 @@ const generateRandomSessions = ({ timeStamp, sessionId }) => {
     sessionId += 1;
     lastTimeStamp = start;
   }
+  lastTimeStampPerRound = start;
   return sessions;
 };
 
 const getLastTimeStampAndSessionId = (session) => {
   let sessionId = 0;
-  let timeStamp = null;
+  let timeStamp = constants.startInMilliseconds;
   const sessionDetails = session ? session.match(/\d+/g) : null;
   if (sessionDetails) {
     timeStamp = Number(sessionDetails[2]);
@@ -172,7 +184,9 @@ const getLastTimeStampAndSessionId = (session) => {
 // this function finds all the active sessions, and then passes them to triggerEvents.
 const findActiveSessions = (sessions) => {
   let active = sessions ? sessions.split(',') : [];
-  active = active.filter(session => !(session.match(/\d+/g)[3] < Date.now()));
+  // active = active.filter(session => !(session.match(/\d+/g)[3] < Date.now()));
+  active = active.filter(session => !(session.match(/\d+/g)[3]) < lastTimeStampPerRound);
+  // something wrong with the check for session time for history
   const lastEntry = getLastTimeStampAndSessionId(active[active.length - 1]);
   const newSessions = generateRandomSessions(lastEntry);
   active = active.concat(newSessions);
@@ -191,11 +205,14 @@ const getSessions = () => {
 };
 
 let catchUpTillDate;
+let round = 1;
 
 const checkTimeForNow = (time) => {
   if (time > Date.now()) {
     clearInterval(catchUpTillDate);
   } else {
+    console.log(`round number - ${round}`);
+    round += 1;
     getSessions();
   }
 };
@@ -203,7 +220,8 @@ const checkTimeForNow = (time) => {
 const addMockData = () => {
   catchUpTillDate = setInterval(() => {
     checkTimeForNow(lastTimeStamp);
-  }, 20000);
+  }, constants.generateRandomSeconds(1000, 10000));
+  // make incrementally larger
 };
 
 addMockData();
