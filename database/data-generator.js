@@ -213,7 +213,7 @@ const checkTimeForNow = (time) => {
     process.exit();
   } else {
     console.log(`round number - ${round}`);
-    console.log('last time stamp per round', lastTimeStampPerRound);
+    console.log('last time stamp per round', lastTimeStampPerRound ? new Date(lastTimeStampPerRound).toISOString() : undefined);
     round += 1;
     getSessions();
   }
@@ -222,7 +222,7 @@ const checkTimeForNow = (time) => {
 const addMockData = () => {
   catchUpTillDate = setInterval(() => {
     checkTimeForNow(lastTimeStamp);
-  }, constants.generateRandomSeconds(1000, 2000));
+  }, constants.generateRandomSeconds(1000, 2500));
 };
 
 addMockData();
