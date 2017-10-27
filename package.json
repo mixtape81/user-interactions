@@ -6,9 +6,8 @@
   "scripts": {
     "server-dev": "nodemon --inspect server/index.js",
     "server-dev-test": "NODE_ENV=test nodemon --inspect server/index.js",
-    "test": "NODE_ENV=travis mocha --reporter nyan tests/server-spec.js --exit",
-    "test-dev": "NODE_ENV=test mocha tests/server-spec.js --exit",
-    "test-mock": "NODE_ENV=test mocha tests/mockdata-spec.js --exit"
+    "test": "NODE_ENV=travis mocha --reporter nyan tests/specs.js --exit",
+    "test-dev": "NODE_ENV=test mocha tests/specs.js --exit"
   },
   "author": "Neha Chaudhary",
   "license": "ISC",

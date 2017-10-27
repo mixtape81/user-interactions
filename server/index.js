@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 require('./environment.js');
-// const dummydata = require('../database/dummyData.js');
+const dummydata = require('../database/dummyData.js');
 const helpers = require('../helpers/helpers.js');
 
 const app = express();
@@ -118,17 +118,17 @@ app.post('/songresponse', (req, res) => {
     .catch(err => res.status(400).send(err));
 });
 
-// app.post('/dummydata', (req, res) => {
-//   dummydata.dropTables()
-//     .then(() => dummydata.addEvents())
-//     .then(() => dummydata.testRun())
-//     .then((result) => {
-//       res.send(result);
-//     })
-//     .catch((err) => {
-//       res.status(400).send(err);
-//     });
-// });
+app.post('/dummydata', (req, res) => {
+  dummydata.dropTables()
+    .then(() => dummydata.addEvents())
+    .then(() => dummydata.testRun())
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+});
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
