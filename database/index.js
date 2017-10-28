@@ -43,9 +43,10 @@ const Log = db.define('log', {
   },
   user_id: Sequelize.INTEGER,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: true, fields: ['eventTypeId', 'sessionId'] }]
 });
 
 const PlaylistView = db.define('playlist_view', {
@@ -57,9 +58,10 @@ const PlaylistView = db.define('playlist_view', {
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: true, fields: ['playlist_id', 'createdAt'] }]
 });
 
 const Search = db.define('search', {
@@ -72,7 +74,8 @@ const Search = db.define('search', {
   date: Sequelize.DATEONLY,
   createdAt: Sequelize.DATE
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: true, fields: ['date', 'createdAt'] }]
 });
 
 const SongReaction = db.define('song_reaction', {
@@ -88,7 +91,8 @@ const SongReaction = db.define('song_reaction', {
   date: Sequelize.DATEONLY,
   createdAt: Sequelize.DATE
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: true, fields: ['date', 'createdAt'] }]
 });
 
 const SongResponse = db.define('song_response', {
@@ -104,7 +108,8 @@ const SongResponse = db.define('song_response', {
   date: Sequelize.DATEONLY,
   createdAt: Sequelize.DATE
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: true, fields: ['date', 'createdAt'] }]
 });
 
 EventType.hasMany(Log);

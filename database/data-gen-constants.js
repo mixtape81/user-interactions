@@ -1,10 +1,8 @@
-const moment = require('moment');
-console.log('augusts 1st', moment('2017-08-01T10:00:06.420Z'));
 const usersWithSessions = {};
-const startDate = new Date('2017-08-01T10:00:06.420Z').toISOString();
+const startDate = new Date('2017-08-01T10:00:06.420Z').toISOString(); // 10 am UTC;
 const startInMilliseconds = 1501581638000;
-const end = 1501644281000;
-
+// 1501977605972 2017-08-06T00:03:49.943Z
+// 1501977605972
 const genres = [
   'Rock and Roll',
   'Folk',
@@ -31,14 +29,15 @@ const playlists = {
   10: [19, 20]
 };
 
+
 const dayEstimates = {
-  1: 30, // 100000
-  2: 21, // 45980 // 90000
-  3: 24, // 53856 // 105000
-  4: 28, // 110000
-  5: 36, // 150000
-  6: 46, // 180000
-  7: 26  // 120000
+  1: 52, // 100000
+  2: 45, // 45980 // 90000
+  3: 55, // 53856 // 105000  // 71248
+  4: 60, // 64245 // 110000 
+  5: 75, // 70763 // 150000
+  6: 70, // 74842 // 180000
+  0: 56  // 120000
 };
 
 // random index between 0 & 1
@@ -72,16 +71,26 @@ const generateRandomPlaylistId = () => Math.floor(Math.random() * 20) + 1;
 const generateRandomUserId = () => Math.floor(Math.random() * 25000) + 1;
 
 // this function generates random number of seconds to increment
-const generateRandomSeconds = (start, end) => Math.floor(Math.random() * end) + start;
+const generateRandomSeconds = (start, end) => Math.floor(Math.random() * (end - start)) + start;
 
 const generateRandomMilliseconds = () => Math.floor(Math.random() * 100) + 1;
 
 const averageSessionsPerDay = (timeStamp) => {
-  const day = new Date(timeStamp).getDay();
+  const day = new Date(timeStamp + (420 * 60000)).getDay();
+  // console.log('timestamp', timeStamp);
+  // const time = new Date(timeStamp + (420 * 60000));
   const sessions = dayEstimates[day];
+  // const hours = time.getHours();
+  // if (hours >= 1 && hours <= 8 || hours === 23 || hours === 0) {
+  //   sessions = 3;
+  // } else if (hours >= 8 && hours <= 11){
+  //   const sessions = dayEstimates[day] / 2;
+  // }
   const variation = [true, false][generateRandomIndex()];
+  // console.log('variations', variation);
   const random = Math.floor(Math.random() * 3);
-  dayEstimates[day] = variation ? sessions + random : sessions - random;
+  dayEstimates[day] = variation ? sessions + random : (sessions - random || 1);
+  console.log('day dayEstimates', dayEstimates);
   return sessions;
 };
 
@@ -110,11 +119,12 @@ const genreProbabilities = (n) => {
 };
 
 const parseDate = (date) => {
+  // console.log('here with date', date);
   const variation = [true, false][generateRandomIndex()];
   const createdAt = variation ? date + generateRandomSeconds(100, 10000)
     : date - generateRandomSeconds(100, 10000);
-  const parsed = new Date(Number(createdAt));
-  return { date: parsed.toISOString(), createdAt: parsed.toISOString() };
+  const parsed = new Date(Number(createdAt)).toISOString();
+  return { date: parsed.match(/\d+-\d+-\d+/)[0], createdAt: createdAt };
 };
 
 const generateRandomPlaylistInfo = () => {
@@ -144,15 +154,7 @@ module.exports = {
   generateRandomMilliseconds,
   startInMilliseconds,
   parseDate,
-  end,
   dayEstimates,
   averageSessionsPerDay,
   generateRandomSessionCount
 };
-
-
-
-
-
-
-
