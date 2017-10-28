@@ -7,7 +7,8 @@ const config = {
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  dialect: 'postgres'
+  dialect: 'postgres',
+  logging: false
 };
 
 const db = new Sequelize(config);
@@ -41,7 +42,10 @@ const Log = db.define('log', {
     autoIncrement: true
   },
   user_id: Sequelize.INTEGER,
-  date: Sequelize.DATEONLY
+  date: Sequelize.DATEONLY,
+  createdAt: Sequelize.DATE
+}, {
+  timestamps: false
 });
 
 const PlaylistView = db.define('playlist_view', {
@@ -52,7 +56,10 @@ const PlaylistView = db.define('playlist_view', {
   },
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
-  date: Sequelize.DATEONLY
+  date: Sequelize.DATEONLY,
+  createdAt: Sequelize.DATE
+}, {
+  timestamps: false
 });
 
 const Search = db.define('search', {
@@ -62,7 +69,10 @@ const Search = db.define('search', {
     autoIncrement: true
   },
   value: Sequelize.STRING,
-  date: Sequelize.DATEONLY
+  date: Sequelize.DATEONLY,
+  createdAt: Sequelize.DATE
+}, {
+  timestamps: false
 });
 
 const SongReaction = db.define('song_reaction', {
@@ -75,7 +85,10 @@ const SongReaction = db.define('song_reaction', {
   liked: Sequelize.BOOLEAN,
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
-  date: Sequelize.DATEONLY
+  date: Sequelize.DATEONLY,
+  createdAt: Sequelize.DATE
+}, {
+  timestamps: false
 });
 
 const SongResponse = db.define('song_response', {
@@ -88,7 +101,10 @@ const SongResponse = db.define('song_response', {
   listenedTo: Sequelize.BOOLEAN,
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
-  date: Sequelize.DATEONLY
+  date: Sequelize.DATEONLY,
+  createdAt: Sequelize.DATE
+}, {
+  timestamps: false
 });
 
 EventType.hasMany(Log);
@@ -109,14 +125,14 @@ SongReaction.belongsTo(Log);
 Log.hasMany(SongResponse);
 SongResponse.belongsTo(Log);
 
-// EventType.sync()
-//   .then(() => Session.sync())
-//   .then(() => Log.sync())
-//   .then(() => PlaylistView.sync())
-//   .then(() => Search.sync())
-//   .then(() => SongReaction.sync())
-//   .then(() => SongResponse.sync())
-//   .catch(err => console.log('error syncing schema tables', err));
+EventType.sync()
+  .then(() => Session.sync())
+  .then(() => Log.sync())
+  .then(() => PlaylistView.sync())
+  .then(() => Search.sync())
+  .then(() => SongReaction.sync())
+  .then(() => SongResponse.sync())
+  .catch(err => console.log('error syncing schema tables', err));
 
 module.exports = {
   db,
