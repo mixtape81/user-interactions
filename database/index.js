@@ -46,7 +46,7 @@ const Log = db.define('log', {
   createdAt: Sequelize.BIGINT
 }, {
   timestamps: false,
-  indexes: [{ unique: true, fields: ['eventTypeId', 'sessionId'] }]
+  indexes: [{ unique: false, fields: ['eventTypeId', 'sessionId'] }]
 });
 
 const PlaylistView = db.define('playlist_view', {
@@ -61,7 +61,7 @@ const PlaylistView = db.define('playlist_view', {
   createdAt: Sequelize.BIGINT
 }, {
   timestamps: false,
-  indexes: [{ unique: true, fields: ['playlist_id', 'createdAt'] }]
+  indexes: [{ unique: false, fields: ['playlist_id', 'createdAt'] }]
 });
 
 const Search = db.define('search', {
@@ -72,10 +72,10 @@ const Search = db.define('search', {
   },
   value: Sequelize.STRING,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
   timestamps: false,
-  indexes: [{ unique: true, fields: ['date', 'createdAt'] }]
+  indexes: [{ unique: false, fields: ['date', 'createdAt'] }]
 });
 
 const SongReaction = db.define('song_reaction', {
@@ -89,10 +89,10 @@ const SongReaction = db.define('song_reaction', {
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
   timestamps: false,
-  indexes: [{ unique: true, fields: ['date', 'createdAt'] }]
+  indexes: [{ unique: false, fields: ['date', 'createdAt'] }]
 });
 
 const SongResponse = db.define('song_response', {
@@ -106,10 +106,10 @@ const SongResponse = db.define('song_response', {
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
   timestamps: false,
-  indexes: [{ unique: true, fields: ['date', 'createdAt'] }]
+  indexes: [{ unique: false, fields: ['date', 'createdAt'] }]
 });
 
 EventType.hasMany(Log);

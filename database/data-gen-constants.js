@@ -31,13 +31,13 @@ const playlists = {
 
 
 const dayEstimates = {
-  1: 52, // 100000
-  2: 45, // 45980 // 90000
-  3: 55, // 53856 // 105000  // 71248
-  4: 60, // 64245 // 110000 
-  5: 75, // 70763 // 150000
-  6: 70, // 74842 // 180000
-  0: 56  // 120000
+  1: 15, // 100000
+  2: 13, // 45980 // 90000
+  3: 17, // 53856 // 105000  // 71248
+  4: 19, // 64245 // 110000 
+  5: 23, // 70763 // 150000
+  6: 28, // 74842 // 180000
+  0: 21  // 120000
 };
 
 // random index between 0 & 1
@@ -90,7 +90,6 @@ const averageSessionsPerDay = (timeStamp) => {
   // console.log('variations', variation);
   const random = Math.floor(Math.random() * 3);
   dayEstimates[day] = variation ? sessions + random : (sessions - random || 1);
-  console.log('day dayEstimates', dayEstimates);
   return sessions;
 };
 
