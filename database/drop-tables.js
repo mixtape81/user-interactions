@@ -2,10 +2,10 @@ const db = require('./index.js');
 
 // events array
 const events = [
-  { type: 'playlist_views' },
-  { type: 'search' },
-  { type: 'song_reactions' },
-  { type: 'song_responses' }
+  { type: 'Playlist views' },
+  { type: 'Search' },
+  { type: 'Song Reactions' },
+  { type: 'Song Responses' }
 ];
 
 // drops all tables in database when needed

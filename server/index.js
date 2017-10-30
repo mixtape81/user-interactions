@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-require('./environment.js');
-const dummydata = require('../database/dummyData.js');
+require('../environment.js');
+const dummydata = require('../database/drop-tables.js');
 const helpers = require('../helpers/helpers.js');
 
 const app = express();
@@ -122,7 +122,7 @@ app.post('/dummydata', (req, res) => {
     .then(() => dummydata.addEvents())
     .then(() => dummydata.testRun())
     .then((result) => {
-      res.send(result);
+      res.send('DONE');
     })
     .catch((err) => {
       res.status(400).send(err);

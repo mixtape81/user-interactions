@@ -1,8 +1,8 @@
 const usersWithSessions = {};
 const startDate = new Date('2017-08-01T10:00:06.420Z').toISOString(); // 10 am UTC;
 const startInMilliseconds = 1501581638000;
-// 1501977605972 2017-08-06T00:03:49.943Z
-// 1501977605972
+let count = 1;
+
 const genres = [
   'Rock and Roll',
   'Folk',
@@ -40,6 +40,8 @@ const dayEstimates = {
   0: 21  // 120000
 };
 
+const generateCountforSessions = () => Math.floor(Math.random() * 3) + 1;
+
 // random index between 0 & 1
 const generateRandomIndex = () => Math.floor(Math.random() * 2);
 
@@ -68,28 +70,69 @@ const parseSession = session => session.match(/\d+/g);
 const generateRandomPlaylistId = () => Math.floor(Math.random() * 20) + 1;
 
 // this function generates a random user id
-const generateRandomUserId = () => Math.floor(Math.random() * 25000) + 1;
+const generateRandomUserId = () => Math.floor(Math.random() * 10000) + 1;
 
 // this function generates random number of seconds to increment
 const generateRandomSeconds = (start, end) => Math.floor(Math.random() * (end - start)) + start;
 
 const generateRandomMilliseconds = () => Math.floor(Math.random() * 100) + 1;
 
+const getTimeDetails = (timestamp) => {
+  const time = new Date(timestamp + (420 * 60000));
+  const day = time.getDay();
+  const date = time.getDate();
+  const hour = time.getHours();
+  const minutes = time.getMinutes();
+  return {
+    time, day, date, hour, minutes
+  };
+};
+
 const averageSessionsPerDay = (timeStamp) => {
-  const day = new Date(timeStamp + (420 * 60000)).getDay();
-  // console.log('timestamp', timeStamp);
+  // console.log('random count generated', generateCountforSessions());
+  // console.log('day dayEstimates', dayEstimates);
+  const {
+    hour, day, minutes
+  } = getTimeDetails(timeStamp);
+
   // const time = new Date(timeStamp + (420 * 60000));
-  const sessions = dayEstimates[day];
+  // const day = time.getDay();
+  const previous = dayEstimates[day];
+  let sessions = dayEstimates[day];
   // const hours = time.getHours();
-  // if (hours >= 1 && hours <= 8 || hours === 23 || hours === 0) {
-  //   sessions = 3;
-  // } else if (hours >= 8 && hours <= 11){
-  //   const sessions = dayEstimates[day] / 2;
-  // }
+  // const minutes = time.getMinutes();
+  if ((hour >= 1 && hour <= 7) || hour === 23 || hour === 0) {
+    if (hour === 23 && minutes <= 20 && minutes >= 0) {
+      sessions = 3;
+    } else if (hour === 23 && minutes >= 21 && minutes <= 40) {
+      sessions = 2;
+    } else if (hour === 23 && minutes >= 40 && minutes <= 59) {
+      sessions = 1;
+    } else if (hour === 7) {
+      if (minutes >= 0 && minutes <= 20) {
+        sessions = Math.floor(dayEstimates[day] / 2);
+      } else if (minutes >= 21 && minutes <= 40) {
+        sessions = dayEstimates[day];
+      } else if (minutes >= 41 && minutes <= 59) {
+        sessions = dayEstimates[day] * 2;
+      }
+    } else {
+      sessions = [0, 1][Math.floor(Math.random() * 2)];
+    }
+  } else if (hour >= 8 && hour <= 11) {
+    sessions = dayEstimates[day] * generateCountforSessions();
+  } else if (hour >= 12 && hour <= 16) {
+    sessions = Math.floor(dayEstimates[day] / generateCountforSessions());
+  } else if (hour >= 17 && hour <= 20) {
+    sessions = Math.ceil(dayEstimates[day] * 1.5);
+  } else if (hour >= 21 && hour < 23) {
+    sessions = dayEstimates[day];
+  }
+  sessions = sessions < 1 ? 1 : sessions;
   const variation = [true, false][generateRandomIndex()];
-  // console.log('variations', variation);
-  const random = Math.floor(Math.random() * 3);
-  dayEstimates[day] = variation ? sessions + random : (sessions - random || 1);
+  const random = generateCountforSessions();
+  const value = variation ? Math.floor(previous + random * 1.5) : (previous - random);
+  dayEstimates[day] = value < 1 ? value * -1 : value;
   return sessions;
 };
 
@@ -123,7 +166,7 @@ const parseDate = (date) => {
   const createdAt = variation ? date + generateRandomSeconds(100, 10000)
     : date - generateRandomSeconds(100, 10000);
   const parsed = new Date(Number(createdAt)).toISOString();
-  return { date: parsed.match(/\d+-\d+-\d+/)[0], createdAt: createdAt };
+  return { date: parsed.match(/\d+-\d+-\d+/)[0], createdAt: (createdAt + '') };
 };
 
 const generateRandomPlaylistInfo = () => {

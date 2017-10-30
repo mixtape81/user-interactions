@@ -1,22 +1,18 @@
-const fs = require('fs');
-const path = require('path');
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
+const files = require('./files-index');
 const constants = require('./data-gen-constants.js');
 // const queries = require('./queries.js');
 
-const logFile = path.join(__dirname, './jsons/logs.txt');
-const songResponseFile = path.join(__dirname, './jsons/song-responses.txt');
-const songReactionFile = path.join(__dirname, './jsons/song-reactions.txt');
-const searchFile = path.join(__dirname, './jsons/searches.txt');
-const playlistViewFile = path.join(__dirname, './jsons/playlist-views.txt');
-const sessionsFile = path.join(__dirname, './jsons/sessions.txt')
-
+let catchUpTillDate;
+let lastSession = `0--null--${constants.startInMilliseconds}--${constants.startInMilliseconds + (58 * 60000)}`;
 let addTime;
 let lastEntry;
 let lastTimeStamp = constants.startInMilliseconds;
 let lastTimeStampPerRound;
-// let lastSession = `0--null--${constants.startInMilliseconds}--${constants.startInMilliseconds + (58 * 60000)}`;
 let round = 1;
 let logId = 1;
+
 
 // this function triggers a playlist view
 const triggerPlaylistView = (session) => {
@@ -24,51 +20,43 @@ const triggerPlaylistView = (session) => {
   const list = constants.generateRandomPlaylistInfo();
   const date = constants.parseDate(Number(session[2]));
 
-  // const event = {
-  //   playlist_id: list.playlist,
-  //   genre_id: list.genre,
-  //   date: date.date,
-  //   createdAt: date.createdAt,
-  //   logId
-  // };
+  const event = {
+    playlist_id: list.playlist,
+    genre_id: list.genre,
+    date: date.date,
+    createdAt: date.createdAt,
+    logId
+  };
 
-  // const log = {
-  //   user_id: Number(session[1]),
-  //   sessionId: Number(session[0]),
-  //   eventTypeId: 1,
-  //   date: date.date,
-  //   createdAt: date.createdAt,
-  //   id: logId
-  // };
+  const log = {
+    user_id: Number(session[1]),
+    sessionId: Number(session[0]),
+    eventTypeId: 1,
+    date: date.date,
+    createdAt: date.createdAt
+    // logId
+  };
 
-
-
+  const pvJSON = `${files.index}\n${JSON.stringify(event)}\n`;
+  const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
   const pvSQL = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 1, ${Number(session[0])}),\n`;
-  // console.log('view', pvSQL);
-  // console.log('log', logSQL);
+
 
   logId += 1;
-  // const eventJSON = `${JSON.stringify(event)}\n`;
-  // const logJSON = `${JSON.stringify(log)}\n`;
 
-  fs.appendFile(logFile, logSQL, (err) => {
-    if (err) {
-      console.log('error writing logs in playlist view', err);
-    } else {
-      fs.appendFile(playlistViewFile, pvSQL, (error) => {
-        if (err) {
-          console.error('error writing to playlist view file', error);
-        }
-      });
-    }
-  });
+  fs.appendFileAsync(files.logs, logSQL)
+    .then(() => fs.appendFileAsync(files.logsJSON, logJSON))
+    .then(() => fs.appendFileAsync(files.playlistViews, pvSQL))
+    .then(() => fs.appendFileAsync(files.playlistViewsJSON, pvJSON))
+    .catch(err => console.error('error writing to playlist views', err));
+
   // return queries.addToLogs(query)
   //   .then((log) => {
   //     query.logId = log.id;
   //     return queries.addToPlaylistView(query);
   //   })
-  //   .catch(err => console.log('error adding view from generator', err));   
+  //   .catch(err => console.log('error adding view from generator', err));
 };
 
 // this function triggers a genre searched
@@ -76,39 +64,34 @@ const triggerSearch = (session) => {
   // console.log('triggered search with session', session);
   const value = constants.genres[constants.generateRandomGenreId() - 1];
   const date = constants.parseDate(Number(session[2]));
-  // const event = {
-  //   value,
-  //   date: date.date,
-  //   createdAt: date.createdAt,
-  //   logId
-  // };
+  const search = {
+    value,
+    date: date.date,
+    createdAt: date.createdAt,
+    logId
+  };
 
-  // const log = {
-  //   user_id: Number(session[1]),
-  //   sessionId: Number(session[0]),
-  //   eventTypeId: 2,
-  //   date: date.date,
-  //   createdAt: date.createdAt,
-  //   id: logId
-  // };
+  const log = {
+    user_id: Number(session[1]),
+    sessionId: Number(session[0]),
+    eventTypeId: 2,
+    date: date.date,
+    createdAt: date.createdAt
+    // logId
+  };
 
-    // const eventJSON = `${JSON.stringify(event)}\n`;
-  // const logJSON = `${JSON.stringify(log)}\n`;
-  const eventSQL = `('${value}','${date.date}', ${date.createdAt}, ${logId}),\n`;
+  const searchJSON = `${files.index}\n${JSON.stringify(search)}\n`;
+  const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
+  const searchSQL = `('${value}','${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 2, ${Number(session[0])}),\n`;
   logId += 1;
 
-  fs.appendFile(logFile, logSQL, (err) => {
-    if (err) {
-      console.log('error writing logs in search', err);
-    } else {
-      fs.appendFile(searchFile, eventSQL, (error) => {
-        if (err) {
-          console.error('error writing to search file', error);
-        }
-      });
-    }
-  });
+  fs.appendFileAsync(files.logs, logSQL)
+    .then(() => fs.appendFileAsync(files.logsJSON, logJSON))
+    .then(() => fs.appendFileAsync(files.searches, searchSQL))
+    .then(() => fs.appendFileAsync(files.searchesJSON, searchJSON))
+    .catch(err => console.error('error writing to search', err));
+
   // return queries.addToLogs(query)
   //   .then((log) => {
   //     query.logId = log.id;
@@ -122,46 +105,36 @@ const triggerSongReaction = (session) => {
   // console.log('triggered song reaction with session', session);
   const list = constants.generateRandomPlaylistInfo();
   const date = constants.parseDate(Number(session[2]));
-  // const event = {
-  //   liked: constants.generateBoolean(),
-  //   song_id: constants.generateRandomSongId(),
-  //   playlist_id: list.playlist,
-  //   genre_id: list.playlist,
-  //   date: date.date,
-  //   createdAt: date.createdAt,
-  //   logId
-  // };
+  const songReaction = {
+    liked: constants.generateBoolean(),
+    song_id: constants.generateRandomSongId(),
+    playlist_id: list.playlist,
+    genre_id: list.playlist,
+    date: date.date,
+    createdAt: date.createdAt
+  };
 
-  // const log = {
-  //   user_id: Number(session[1]),
-  //   sessionId: Number(session[0]),
-  //   eventTypeId: 3,
-  //   date: date.date,
-  //   createdAt: date.createdAt,
-  //   id: logId
-  // };
+  const log = {
+    user_id: Number(session[1]),
+    sessionId: Number(session[0]),
+    eventTypeId: 3,
+    date: date.date,
+    createdAt: date.createdAt
+    // logId
+  };
 
-  // logId += 1;
-
-    // const eventJSON = `${JSON.stringify(event)}\n`;
-  // const logJSON = `${JSON.stringify(log)}\n`;
-  const eventSQL = `(${constants.generateRandomSongId()}, ${constants.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
+  const songReactionJSON = `${files.index}\n${JSON.stringify(songReaction)}\n`;
+  const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
+  const songReactionSQL = `(${constants.generateRandomSongId()}, ${constants.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])},'${date.date}', ${date.createdAt}, 3, ${Number(session[0])}),\n`;
 
   logId += 1;
 
-  fs.appendFile(logFile, logSQL, (err) => {
-    if (err) {
-      console.log('error writing logs in song reaction', err);
-    } else {
-      fs.appendFile(songReactionFile, eventSQL, (error) => {
-        if (err) {
-          console.error('error writing to song reactions file', error);
-        }
-      });
-    }
-  });
-
+  fs.appendFileAsync(files.logs, logSQL)
+    .then(() => fs.appendFileAsync(files.logsJSON, logJSON))
+    .then(() => fs.appendFileAsync(files.songReactions, songReactionSQL))
+    .then(() => fs.appendFileAsync(files.songReactionsJSON, songReactionJSON))
+    .catch(err => console.error('error writing song reaction', err));
 
 //   return queries.addToLogs(songReaction)
 //     .then((log) => {
@@ -178,42 +151,37 @@ const triggerSongResponse = (session) => {
   // console.log('triggered song response with session', session);
   const list = constants.generateRandomPlaylistInfo();
   const date = constants.parseDate(Number(session[2]));
-  // const event = {
-  //   listenedTo: constants.generateBoolean(),
-  //   song_id: constants.generateRandomSongId(),
-  //   playlist_id: list.playlist,
-  //   genre_id: list.playlist,
-  //   date: date.date,
-  //   createdAt: date.createdAt,
-  //   logId
-  // };
+  const songResponse = {
+    listenedTo: constants.generateBoolean(),
+    song_id: constants.generateRandomSongId(),
+    playlist_id: list.playlist,
+    genre_id: list.playlist,
+    date: date.date,
+    createdAt: date.createdAt,
+    logId
+  };
 
-  // const log = {
-  //   user_id: Number(session[1]),
-  //   sessionId: Number(session[0]),
-  //   eventTypeId: 4,
-  //   date: date.date,
-  //   createdAt: date.createdAt,
-  //   id: logId
-  // };
-  // const eventJSON = `${JSON.stringify(event)}\n`;
-  // const logJSON = `${JSON.stringify(log)}\n`;
-  const eventSQL = `(${constants.generateRandomSongId()}, ${constants.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
+  const log = {
+    user_id: Number(session[1]),
+    sessionId: Number(session[0]),
+    eventTypeId: 4,
+    date: date.date,
+    createdAt: date.createdAt
+    // logId
+  };
+
+  const songResponseJSON = `${files.index}\n${JSON.stringify(songResponse)}\n`;
+  const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
+  const songResponseSQL = `(${constants.generateRandomSongId()}, ${constants.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 4, ${Number(session[0])}),\n`;
 
   logId += 1;
-  // console.log('song response body', songResponse);
-  fs.appendFile(logFile, logSQL, (err) => {
-    if (err) {
-      console.log('error writing logs in song resposne', err);
-    } else {
-      fs.appendFile(songResponseFile, eventSQL, (error) => {
-        if (err) {
-          console.error('error writing to song response file', error);
-        }
-      });
-    }
-  })
+
+  fs.appendFileAsync(files.logs, logSQL)
+    .then(() => fs.appendFileAsync(files.logsJSON, logJSON))
+    .then(() => fs.appendFileAsync(files.songResponses, songResponseSQL))
+    .then(() => fs.appendFileAsync(files.songResponsesJSON, songResponseJSON))
+    .catch(err => console.error('error writing song response', err));
 
   // return queries.addToLogs(songResponse)
   //   .then((log) => {
@@ -223,9 +191,10 @@ const triggerSongResponse = (session) => {
   //   .catch(err => console.log('error adding song response from generator', err));
 };
 
-const triggerSkip = (session) => {
+const triggerSkip = () => {
   // console.log('triggered skip for this session', session);
 };
+
 
 // this function will initiate a trigger for a specific event for each session
 const triggerEventsOnSessions = (sessionsToTrigger) => {
@@ -242,22 +211,17 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
   });
 };
 
+
+
 // this function writes current sessions to sessions.txt
 const archiveSessions = (active) => {
-  fs.truncate(sessionsFile, (err) => {
-    if (err) {
-      console.log('error truncating file', err);
-    } else {
-      fs.writeFile(sessionsFile, active, (error) => {
-        if (err) {
-          console.log('error writing files', error);
-        } else {
-          triggerEventsOnSessions(active);
-        }
-      });
-    }
-  });
+  fs.truncateAsync(files.sessions)
+    .then(() => fs.writeFileAsync(files.sessions, active))
+    .then(() => triggerEventsOnSessions(active))
+    .catch(err => console.log('error archiving sessions', err));
 };
+
+
 
 // this function generates a random end time for each session based on
 // start time (limit: 120 mins)
@@ -267,13 +231,15 @@ const generateRandomEndTime = (start) => {
   return time + sessionTime;
 };
 
+
 // this session adds a random milliseconds to session starts to keep them more unique
 const addRandomTime = () => {
   addTime = Math.floor(Math.random() * 10000);
   return addTime;
 };
 
-const getLastTimeStampAndSessionId = (session) => {
+
+const getLastTimeStampAndSessionId = (session = lastSession) => {
   let sessionId = 0;
   let timeStamp = constants.startInMilliseconds;
   const details = session ? constants.parseSession(session) : null;
@@ -286,10 +252,12 @@ const getLastTimeStampAndSessionId = (session) => {
   return { timeStamp, sessionId };
 };
 
+
 // this function creates 500 random users each time it runs
 const generateRandomSessions = ({ timeStamp, sessionId }) => {
   let start = timeStamp + constants.generateRandomSeconds(50000, 200000);
-  const sessionsToGenerate = constants.averageSessionsPerDay(timeStamp) || 1;
+  const sessionsToGenerate = constants.averageSessionsPerDay(timeStamp);
+  console.log('sessions to create', sessionsToGenerate);
   const sessions = [];
   for (let i = 0; i < sessionsToGenerate; i += 1) {
     const user = constants.generateRandomUserId();
@@ -302,10 +270,21 @@ const generateRandomSessions = ({ timeStamp, sessionId }) => {
     sessionId += 1;
     lastTimeStamp = start;
   }
+  console.log('sessions generated', sessions.length);
   lastTimeStampPerRound = start + constants.generateRandomSeconds(5000, 150000);
-  lastSession = sessions[sessions.length - 1];
+  lastSession = sessions[sessions.length - 1] || lastSession;
   return sessions;
 };
+
+
+const generateAndProcessSessions = (active) => {
+  lastEntry = getLastTimeStampAndSessionId(active[active.length - 1]) || lastSession;
+  const newSessions = generateRandomSessions(lastEntry);
+  active = active.concat(newSessions);
+  archiveSessions(active);
+};
+
+
 
 // this function finds all the active sessions, and then passes them to triggerEvents.
 const findActiveSessions = (sessions) => {
@@ -314,33 +293,28 @@ const findActiveSessions = (sessions) => {
   active = active.filter((session) => {
     if (Number(session.match(/\d+/g)[3]) < lastTimeStampPerRound) {
       inactive.push(session);
-    } else {
-      return true;
+      return false;
     }
+    return true;
   });
 
   inactive.forEach((session) => {
     const details = constants.parseSession(session);
     delete constants.usersWithSessions[details[1]];
   });
-
-  lastEntry = getLastTimeStampAndSessionId(active[active.length - 1]);
-  const newSessions = generateRandomSessions(lastEntry);
-  active = active.concat(newSessions);
-  archiveSessions(active);
+  console.log('all active sessions', active.length);
+  generateAndProcessSessions(active);
 };
+
+
 
 const getSessions = () => {
-  fs.readFile(sessionsFile, (err, data) => {
-    if (err) {
-      console.log('error reading sessions file', err);
-    } else {
-      findActiveSessions(data ? data.toString() : null);
-    }
-  });
+  fs.readFileAsync(files.sessions)
+    .then(sessions => findActiveSessions(sessions ? sessions.toString() : null))
+    .catch(err => console.log('error reading sessions file', err));
 };
 
-let catchUpTillDate;
+
 
 const checkTimeForNow = (time) => {
   // if (logId === 10000) {
@@ -355,8 +329,9 @@ const checkTimeForNow = (time) => {
   }
 };
 
+
 const addMockData = () => {
-  const interval = 100;
+  const interval = 150;
   catchUpTillDate = setInterval(() => {
     checkTimeForNow(lastTimeStamp);
   }, interval);

@@ -1,4 +1,4 @@
-require('../server/environment.js');
+require('../environment.js');
 const Sequelize = require('sequelize');
 
 // console.log('environment in db', env.ENV_PATH);
