@@ -1,4 +1,4 @@
-require('../server/environment.js');
+require('../environment.js');
 const Sequelize = require('sequelize');
 
 // console.log('environment in db', env.ENV_PATH);
@@ -43,9 +43,10 @@ const Log = db.define('log', {
   },
   user_id: Sequelize.INTEGER,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: false, fields: ['eventTypeId', 'sessionId'] }]
 });
 
 const PlaylistView = db.define('playlist_view', {
@@ -57,9 +58,10 @@ const PlaylistView = db.define('playlist_view', {
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: false, fields: ['playlist_id', 'createdAt'] }]
 });
 
 const Search = db.define('search', {
@@ -70,9 +72,10 @@ const Search = db.define('search', {
   },
   value: Sequelize.STRING,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: false, fields: ['date', 'createdAt'] }]
 });
 
 const SongReaction = db.define('song_reaction', {
@@ -86,9 +89,10 @@ const SongReaction = db.define('song_reaction', {
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: false, fields: ['date', 'createdAt'] }]
 });
 
 const SongResponse = db.define('song_response', {
@@ -102,9 +106,10 @@ const SongResponse = db.define('song_response', {
   playlist_id: Sequelize.INTEGER,
   genre_id: Sequelize.INTEGER,
   date: Sequelize.DATEONLY,
-  createdAt: Sequelize.DATE
+  createdAt: Sequelize.BIGINT
 }, {
-  timestamps: false
+  timestamps: false,
+  indexes: [{ unique: false, fields: ['date', 'createdAt'] }]
 });
 
 EventType.hasMany(Log);

@@ -1,4 +1,4 @@
-require('../server/environment.js');
+require('../environment.js');
 const supertest = require('supertest');
 const { expect } = require('chai');
 const { app } = require('../server/index.js');

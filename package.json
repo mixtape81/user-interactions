@@ -7,7 +7,8 @@
     "server-dev": "nodemon --inspect server/index.js",
     "server-dev-test": "NODE_ENV=test nodemon --inspect server/index.js",
     "test": "NODE_ENV=travis mocha --reporter nyan tests/specs.js --exit",
-    "test-dev": "NODE_ENV=test mocha tests/specs.js --exit"
+    "test-dev": "NODE_ENV=test mocha tests/specs.js --exit",
+    "generate": "NODE_ENV=test node database/data-generator.js"
   },
   "author": "Neha Chaudhary",
   "license": "ISC",
@@ -26,6 +27,7 @@
     "express": "^4.16.2",
     "moment": "^2.19.1",
     "pg": "^7.3.0",
+    "postgres-import-json": "^1.0.2",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "sequelize": "^4.17.2"
