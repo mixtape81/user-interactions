@@ -89,18 +89,9 @@ const getTimeDetails = (timestamp) => {
 };
 
 const averageSessionsPerDay = (timeStamp) => {
-  // console.log('random count generated', generateCountforSessions());
-  // console.log('day dayEstimates', dayEstimates);
-  const {
-    hour, day, minutes
-  } = getTimeDetails(timeStamp);
-
-  // const time = new Date(timeStamp + (420 * 60000));
-  // const day = time.getDay();
+  const { hour, day, minutes } = getTimeDetails(timeStamp);
   const previous = dayEstimates[day];
   let sessions = dayEstimates[day];
-  // const hours = time.getHours();
-  // const minutes = time.getMinutes();
   if ((hour >= 1 && hour <= 7) || hour === 23 || hour === 0) {
     if (hour === 23 && minutes <= 20 && minutes >= 0) {
       sessions = 3;

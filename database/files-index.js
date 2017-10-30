@@ -32,9 +32,4 @@ module.exports = {
   sessions,
   sessionsJSON,
   index
-  // logIndex,
-  // pvIndex,
-  // searchIndex,
-  // songResponseIndex,
-  // songReactionIndex
 };

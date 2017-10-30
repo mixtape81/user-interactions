@@ -257,7 +257,7 @@ const getLastTimeStampAndSessionId = (session = lastSession) => {
 const generateRandomSessions = ({ timeStamp, sessionId }) => {
   let start = timeStamp + constants.generateRandomSeconds(50000, 200000);
   const sessionsToGenerate = constants.averageSessionsPerDay(timeStamp);
-  console.log('sessions to create', sessionsToGenerate);
+  // console.log('sessions to create', sessionsToGenerate);
   const sessions = [];
   for (let i = 0; i < sessionsToGenerate; i += 1) {
     const user = constants.generateRandomUserId();
@@ -270,7 +270,7 @@ const generateRandomSessions = ({ timeStamp, sessionId }) => {
     sessionId += 1;
     lastTimeStamp = start;
   }
-  console.log('sessions generated', sessions.length);
+  // console.log('sessions generated', sessions.length);
   lastTimeStampPerRound = start + constants.generateRandomSeconds(5000, 150000);
   lastSession = sessions[sessions.length - 1] || lastSession;
   return sessions;
@@ -302,7 +302,7 @@ const findActiveSessions = (sessions) => {
     const details = constants.parseSession(session);
     delete constants.usersWithSessions[details[1]];
   });
-  console.log('all active sessions', active.length);
+  // console.log('all active sessions', active.length);
   generateAndProcessSessions(active);
 };
 
