@@ -2,7 +2,7 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index');
 const constants = require('./data-gen-constants.js');
-// const queries = require('./queries.js');
+const updateDatabase = require('./database-query');
 
 let catchUpTillDate;
 let lastSession = `0--null--${constants.startInMilliseconds}--${constants.startInMilliseconds + (58 * 60000)}`;
@@ -13,10 +13,10 @@ let lastTimeStampPerRound;
 let round = 1;
 let logId = 1;
 
+const checkEntriesCount = () => logId % 100000 === 0;
 
 // this function triggers a playlist view
 const triggerPlaylistView = (session) => {
-  // console.log('triggered playlist view with session', session);
   const list = constants.generateRandomPlaylistInfo();
   const date = constants.parseDate(Number(session[2]));
 
@@ -37,31 +37,34 @@ const triggerPlaylistView = (session) => {
     // logId
   };
 
-  const pvJSON = `${files.index}\n${JSON.stringify(event)}\n`;
+  const viewJSON = `${files.index}\n${JSON.stringify(event)}\n`;
   const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
-  const pvSQL = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
+  const viewSQL = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 1, ${Number(session[0])}),\n`;
 
+  let reachedCount = false;
+  if (checkEntriesCount()) {
+    reachedCount = true;
+  }
 
   logId += 1;
 
   fs.appendFileAsync(files.logs, logSQL)
     .then(() => fs.appendFileAsync(files.logsJSON, logJSON))
-    .then(() => fs.appendFileAsync(files.playlistViews, pvSQL))
-    .then(() => fs.appendFileAsync(files.playlistViewsJSON, pvJSON))
-    .catch(err => console.error('error writing to playlist views', err));
-
-  // return queries.addToLogs(query)
-  //   .then((log) => {
-  //     query.logId = log.id;
-  //     return queries.addToPlaylistView(query);
-  //   })
-  //   .catch(err => console.log('error adding view from generator', err));
+    .then(() => fs.appendFileAsync(files.playlistViews, viewSQL))
+    .then(() => fs.appendFileAsync(files.playlistViewsJSON, viewJSON))
+    .then(() => {
+      if (reachedCount) {
+        reachedCount = false;
+        return updateDatabase();
+      }
+      return null;
+    })
+    .catch(err => console.log('error updating database in play list views', err));
 };
 
 // this function triggers a genre searched
 const triggerSearch = (session) => {
-  // console.log('triggered search with session', session);
   const value = constants.genres[constants.generateRandomGenreId() - 1];
   const date = constants.parseDate(Number(session[2]));
   const search = {
@@ -84,25 +87,31 @@ const triggerSearch = (session) => {
   const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
   const searchSQL = `('${value}','${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 2, ${Number(session[0])}),\n`;
+
+  let reachedCount = false;
+  if (checkEntriesCount()) {
+    reachedCount = true;
+  }
+
   logId += 1;
 
   fs.appendFileAsync(files.logs, logSQL)
     .then(() => fs.appendFileAsync(files.logsJSON, logJSON))
     .then(() => fs.appendFileAsync(files.searches, searchSQL))
     .then(() => fs.appendFileAsync(files.searchesJSON, searchJSON))
-    .catch(err => console.error('error writing to search', err));
-
-  // return queries.addToLogs(query)
-  //   .then((log) => {
-  //     query.logId = log.id;
-  //     return queries.addToSearch(query);
-  //   })
-  //   .catch(err => console.log('error adding search from generator', err));
+    .then(() => {
+      if (reachedCount) {
+        reachedCount = false;
+        return updateDatabase();
+      }
+      return null;
+    })
+    .catch(err => console.log('error updating database in search', err));
 };
+
 
 // this function triggers a song reaction (liked/disliked)
 const triggerSongReaction = (session) => {
-  // console.log('triggered song reaction with session', session);
   const list = constants.generateRandomPlaylistInfo();
   const date = constants.parseDate(Number(session[2]));
   const songReaction = {
@@ -111,7 +120,8 @@ const triggerSongReaction = (session) => {
     playlist_id: list.playlist,
     genre_id: list.playlist,
     date: date.date,
-    createdAt: date.createdAt
+    createdAt: date.createdAt,
+    logId
   };
 
   const log = {
@@ -128,27 +138,30 @@ const triggerSongReaction = (session) => {
   const songReactionSQL = `(${constants.generateRandomSongId()}, ${constants.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])},'${date.date}', ${date.createdAt}, 3, ${Number(session[0])}),\n`;
 
+  let reachedCount = false;
+  if (checkEntriesCount()) {
+    reachedCount = true;
+  }
+
   logId += 1;
 
   fs.appendFileAsync(files.logs, logSQL)
     .then(() => fs.appendFileAsync(files.logsJSON, logJSON))
     .then(() => fs.appendFileAsync(files.songReactions, songReactionSQL))
     .then(() => fs.appendFileAsync(files.songReactionsJSON, songReactionJSON))
-    .catch(err => console.error('error writing song reaction', err));
-
-//   return queries.addToLogs(songReaction)
-//     .then((log) => {
-//       songReaction.logId = log.id;
-//       return queries.addToSongReactions(songReaction);
-//     })
-//     .catch(err => console.log('error adding song reaction from generator', err));
-// };
+    .then(() => {
+      if (reachedCount) {
+        reachedCount = false;
+        return updateDatabase();
+      }
+      return null;
+    })
+    .catch(err => console.log('error updating database in song reaction', err));
 };
 
 
 // this function triggers a song response (heard/skippeds)
 const triggerSongResponse = (session) => {
-  // console.log('triggered song response with session', session);
   const list = constants.generateRandomPlaylistInfo();
   const date = constants.parseDate(Number(session[2]));
   const songResponse = {
@@ -175,20 +188,25 @@ const triggerSongResponse = (session) => {
   const songResponseSQL = `(${constants.generateRandomSongId()}, ${constants.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 4, ${Number(session[0])}),\n`;
 
+  let reachedCount = false;
+  if (checkEntriesCount()) {
+    reachedCount = true;
+  }
+
   logId += 1;
 
   fs.appendFileAsync(files.logs, logSQL)
     .then(() => fs.appendFileAsync(files.logsJSON, logJSON))
     .then(() => fs.appendFileAsync(files.songResponses, songResponseSQL))
     .then(() => fs.appendFileAsync(files.songResponsesJSON, songResponseJSON))
-    .catch(err => console.error('error writing song response', err));
-
-  // return queries.addToLogs(songResponse)
-  //   .then((log) => {
-  //     songResponse.logId = log.id;
-  //     return queries.addToSongResponses(songResponse);
-  //   })
-  //   .catch(err => console.log('error adding song response from generator', err));
+    .then(() => {
+      if (reachedCount) {
+        reachedCount = false;
+        return updateDatabase();
+      }
+      return null;
+    })
+    .catch(err => console.log('error updating database in song response', err));
 };
 
 const triggerSkip = () => {
@@ -210,7 +228,6 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
     events[event](constants.parseSession(session));
   });
 };
-
 
 
 // this function writes current sessions to sessions.txt

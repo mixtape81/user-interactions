@@ -1,23 +1,11 @@
 const path = require('path');
 
-// count for files
-let maxCount = 1;
-let fileNumber = 1;
-
-
-let logsSqlFile = `./sql-files/logs${fileNumber}.sql`;
-let SqlFile = `./sql-files/logs${fileNumber}.sql`;
-let logsSqlFile = `./sql-files/logs${fileNumber}.sql`
-
-
-
-// text files
+// sql files
 const logs = path.join(__dirname, './sql-files/logs.sql');
 const songResponses = path.join(__dirname, './sql-files/song-responses.sql');
 const songReactions = path.join(__dirname, './sql-files/song-reactions.sql');
 const searches = path.join(__dirname, './sql-files/searches.sql');
 const playlistViews = path.join(__dirname, './sql-files/playlist-views.sql');
-const sessions = path.join(__dirname, './text/sessions.txt');
 
 // json files
 const logsJSON = path.join(__dirname, './jsons/logs.json');
@@ -25,9 +13,12 @@ const songResponsesJSON = path.join(__dirname, './jsons/song-responses.json');
 const songReactionsJSON = path.join(__dirname, './jsons/song-reactions.json');
 const searchesJSON = path.join(__dirname, './jsons/searches.json');
 const playlistViewsJSON = path.join(__dirname, './jsons/playlist-views.json');
-const sessionsJSON = path.join(__dirname, './jsons/sessiions.json');
 
+// index object for elasticsearch
 const index = JSON.stringify({ index: {} });
+
+// text file to store sessions temporarily
+const sessions = path.join(__dirname, './text/sessions.txt');
 
 module.exports = {
   logs,
@@ -41,7 +32,5 @@ module.exports = {
   playlistViews,
   playlistViewsJSON,
   sessions,
-  sessionsJSON,
-  index,
-  maxCount
+  index
 };

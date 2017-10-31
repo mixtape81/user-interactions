@@ -40,3 +40,11 @@ dist/
 # see https://npmjs.org/doc/faq.html#Should-I-check-my-node_modules-folder-into-git
 node_modules/
 bower_components/
+
+# Generated Data files
+database/jsons/*.json
+database/sql-files/*.sql
+database/text/sessions.txt
+
+# elasticsearch
+elasticsearch/
