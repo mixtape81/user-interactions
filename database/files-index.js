@@ -1,5 +1,16 @@
 const path = require('path');
 
+// count for files
+let maxCount = 1;
+let fileNumber = 1;
+
+
+let logsSqlFile = `./sql-files/logs${fileNumber}.sql`;
+let SqlFile = `./sql-files/logs${fileNumber}.sql`;
+let logsSqlFile = `./sql-files/logs${fileNumber}.sql`
+
+
+
 // text files
 const logs = path.join(__dirname, './sql-files/logs.sql');
 const songResponses = path.join(__dirname, './sql-files/song-responses.sql');
@@ -31,5 +42,6 @@ module.exports = {
   playlistViewsJSON,
   sessions,
   sessionsJSON,
-  index
+  index,
+  maxCount
 };
