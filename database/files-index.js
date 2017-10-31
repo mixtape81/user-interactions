@@ -17,6 +17,9 @@ const playlistViewsJSON = path.join(__dirname, './jsons/playlist-views.json');
 // index object for elasticsearch
 const index = JSON.stringify({ index: {} });
 
+// text file that contains all the constants for data generator
+const constants = path.join(__dirname, './text/constants.json');
+
 // text file to store sessions temporarily
 const sessions = path.join(__dirname, './text/sessions.txt');
 
@@ -32,5 +35,6 @@ module.exports = {
   playlistViews,
   playlistViewsJSON,
   sessions,
-  index
+  index,
+  constants 
 };

@@ -3,6 +3,7 @@ const supertest = require('supertest');
 const { expect } = require('chai');
 const { app } = require('../server/index.js');
 const request = supertest.agent(app);
+const elasticsearch = require('../elasticsearch/queries.js');
 // const { db } = require('../database/index.js');
 const random = require('../database/data-generator.js');
 const constants = require('../database/data-gen-constants.js');
@@ -335,4 +336,29 @@ describe('Test mock data functions', () => {
       }
     });
   });
+
+    // ************************* TESTS FOR ELASTIC SEARCG ******************************* //
+
+  describe('Tests for elasticsearch', () => {
+    //add tests for elastic search
+    it('should create an index', (done) => {
+
+    });
+
+    it('should delete an index', (done) => {
+
+    });
+
+    it('should add a document to an index', (done) => {
+
+    });
+
+    it('should add documents in bulk to an index', (done) => {
+
+    });
+
+    it ('should retreieve documents from an index', (done) => {
+
+    });
+  })
 });

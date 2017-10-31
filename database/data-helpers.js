@@ -1,7 +1,6 @@
-const usersWithSessions = {};
+let usersWithSessions;
 const startDate = new Date('2017-08-01T10:00:06.420Z').toISOString(); // 10 am UTC;
 const startInMilliseconds = 1501581638000;
-let count = 1;
 
 const genres = [
   'Rock and Roll',
