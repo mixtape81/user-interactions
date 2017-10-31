@@ -45,6 +45,3 @@ bower_components/
 database/jsons/*.json
 database/sql-files/*.sql
 database/text/sessions.txt
-
-# elasticsearch
-elasticsearch/

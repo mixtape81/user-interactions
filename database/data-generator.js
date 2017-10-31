@@ -3,6 +3,7 @@ const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index');
 const helpers = require('./data-helpers.js');
 const updateDatabase = require('./database-query');
+const { addDocumentsinBulk } = require('../elasticsearch/queries.js');
 
 let catchUpTillDate;
 let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
@@ -12,19 +13,39 @@ let lastTimeStamp = helpers.startInMilliseconds;
 let lastTimeStampPerRound;
 let round = 1;
 let logId = 1;
+let count = 0;
 
-const checkEntriesCount = () => logId % 1000 === 0;
+const checkEntriesCount = () => {
+  if (count > 10000) {
+    count = 1;
+    return true;
+  }
+  count += 1;
+  return false;
+};
 
 // generate log object for elasticsearch
-const generateLog = (date, session, event) => (
-  {
+const generateLog = (date, session, event) => {
+  const obj = {
     user_id: Number(session[1]),
     sessionId: Number(session[0]),
     eventTypeId: event,
     date: date.date,
     createdAt: date.createdAt
-  }
-);
+  };
+  return `${files.index}\n${JSON.stringify(obj)}\n`;
+};
+
+const feedElasticSearch = () => {
+  console.log('CAME TO FEED ELASTIC SEARCH');
+  fs.readFileAsync(files.logsJSON)
+    .then((data) => {
+      console.log('ELASTIC SEARCH DATA LENGTH', (data.toString().split('\n').length));
+      addDocumentsinBulk('mixtapetest', 'logs', data.toString());
+    })
+    .then(() => fs.truncate(files.logsJSON))
+    .catch(err => console.log('in data generater after adding to elastic error', err));
+};
 
 // this function updates logs
 const updateLogs = (json, sql) => (
@@ -38,7 +59,7 @@ const udpateConstants = () => {
 };
 
 // this function triggers a playlist view
-const triggerPlaylistView = (session) => {;
+const triggerPlaylistView = (session) => {
   const list = helpers.generateRandomPlaylistInfo();
   const date = helpers.parseDate(Number(session[2]));
 
@@ -50,19 +71,19 @@ const triggerPlaylistView = (session) => {;
     logId
   };
 
-  const log = generateLog(date, session, 1);
+  const logJSON = generateLog(date, session, 1);
   const viewJSON = `${files.index}\n${JSON.stringify(view)}\n`;
-  const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
   const viewSQL = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 1, ${Number(session[0])}),\n`;
 
   logId += 1;
 
   updateLogs(logJSON, logSQL)
-    .then(() => udpateConstants(logId))
+    .then(() => udpateConstants())
     .then(() => fs.appendFileAsync(files.playlistViews, viewSQL))
     .then(() => fs.appendFileAsync(files.playlistViewsJSON, viewJSON))
     .then(() => checkEntriesCount() ? updateDatabase() : null)
+    .then((value) => value ? feedElasticSearch() : null)
     .catch(err => console.log('error updating database in play list views', err));
 };
 
@@ -78,19 +99,19 @@ const triggerSearch = (session) => {
     logId
   };
 
-  const log = generateLog(date, session, 2);
+  const logJSON = generateLog(date, session, 2);
   const searchJSON = `${files.index}\n${JSON.stringify(search)}\n`;
-  const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
   const searchSQL = `('${value}','${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 2, ${Number(session[0])}),\n`;
 
   logId += 1;
 
   updateLogs(logJSON, logSQL)
-    .then(() => udpateConstants(logId))
+    .then(() => udpateConstants())
     .then(() => fs.appendFileAsync(files.searches, searchSQL))
     .then(() => fs.appendFileAsync(files.searchesJSON, searchJSON))
     .then(() => checkEntriesCount() ? updateDatabase() : null)
+    .then((value) => value ? feedElasticSearch() : null)
     .catch(err => console.log('error updating database in search', err));
 };
 
@@ -110,19 +131,19 @@ const triggerSongReaction = (session) => {
     logId
   };
 
-  const log = generateLog(date, session, 3);
+  const logJSON = generateLog(date, session, 3);
   const songReactionJSON = `${files.index}\n${JSON.stringify(songReaction)}\n`;
-  const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
   const songReactionSQL = `(${helpers.generateRandomSongId()}, ${helpers.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])},'${date.date}', ${date.createdAt}, 3, ${Number(session[0])}),\n`;
 
   logId += 1;
 
   updateLogs(logJSON, logSQL)
-    .then(() => udpateConstants(logId))
+    .then(() => udpateConstants())
     .then(() => fs.appendFileAsync(files.songReactions, songReactionSQL))
     .then(() => fs.appendFileAsync(files.songReactionsJSON, songReactionJSON))
     .then(() => checkEntriesCount() ? updateDatabase() : null)
+    .then((value) => value ? feedElasticSearch() : null)
     .catch(err => console.log('error updating database in song reaction', err));
 };
 
@@ -142,19 +163,19 @@ const triggerSongResponse = (session) => {
     logId
   };
 
-  const log = generateLog(date, session, 4);
+  const logJSON = generateLog(date, session, 4);
   const songResponseJSON = `${files.index}\n${JSON.stringify(songResponse)}\n`;
-  const logJSON = `${files.index}\n${JSON.stringify(log)}\n`;
   const songResponseSQL = `(${helpers.generateRandomSongId()}, ${helpers.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 4, ${Number(session[0])}),\n`;
 
   logId += 1;
 
   updateLogs(logJSON, logSQL)
-    .then(() => udpateConstants(logId))
+    .then(() => udpateConstants())
     .then(() => fs.appendFileAsync(files.songResponses, songResponseSQL))
     .then(() => fs.appendFileAsync(files.songResponsesJSON, songResponseJSON))
     .then(() => checkEntriesCount() ? updateDatabase() : null)
+    .then((value) => value ? feedElasticSearch() : null)
     .catch(err => console.log('error updating database in song response', err));
 };
 
@@ -292,12 +313,14 @@ const checkTimeForNow = (time) => {
     console.log('last time stamp per round', lastTimeStampPerRound ? new Date(lastTimeStampPerRound).toISOString() : undefined);
     round += 1;
     getSessions();
+    console.log('starting wait');
+    setTimeout(() => {}, 5000);
   }
 };
 
 
 const addMockData = () => {
-  const interval = 150;
+  const interval = 200;
   catchUpTillDate = setInterval(() => {
     checkTimeForNow(lastTimeStamp);
   }, interval);

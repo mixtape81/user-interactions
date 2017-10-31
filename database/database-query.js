@@ -29,7 +29,8 @@ const updateDatabase = () => {
     .then((reactions) => {
       queries.bulkAddToDB(`INSERT INTO song_reactions (song_id, liked, playlist_id, genre_id, date, "createdAt", "logId") VALUES ${reactions.toString().replace(/,\n$/, '\n')}`);
     })
-    .then(() => fs.truncateAsync(files.songReactions));
+    .then(() => fs.truncateAsync(files.songReactions))
+    .then(() => 'DONE');
 };
 
 module.exports = updateDatabase;

@@ -36,5 +36,5 @@ module.exports = {
   playlistViewsJSON,
   sessions,
   index,
-  constants 
+  constants
 };
