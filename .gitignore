@@ -1,4 +1,5 @@
 # Project specific
+config.json
 config/development.json
 config/production.json
 config/staging.json
@@ -26,6 +27,10 @@ coverage
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
 
+# Environment Variables
+.env.development
+.env.test
+
 # Compiled Dirs (http://nodejs.org/api/addons.html)
 build/
 dist/
@@ -35,3 +40,8 @@ dist/
 # see https://npmjs.org/doc/faq.html#Should-I-check-my-node_modules-folder-into-git
 node_modules/
 bower_components/
+
+# Generated Data files
+database/jsons/*.json
+database/sql-files/*.sql
+database/text/sessions.txt

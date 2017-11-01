@@ -5,11 +5,15 @@
   "main": "index.js",
   "scripts": {
     "server-dev": "nodemon --inspect server/index.js",
-    "test": "mocha --reporter nyan tests/server-spec.js --exit"
+    "server-dev-test": "NODE_ENV=test nodemon --inspect server/index.js",
+    "test": "NODE_ENV=travis mocha --reporter nyan tests/specs.js --exit",
+    "test-dev": "NODE_ENV=test mocha tests/specs.js --exit",
+    "generate": "NODE_ENV=test node database/data-generator.js"
   },
   "author": "Neha Chaudhary",
   "license": "ISC",
   "devDependencies": {
+    "chai": "^4.1.2",
     "eslint": "^4.9.0",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0",
@@ -18,7 +22,13 @@
     "supertest": "^3.0.0"
   },
   "dependencies": {
+    "aws-sdk": "^2.141.0",
+    "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
-    "express": "^4.16.2"
+    "dotenv": "^4.0.0",
+    "elasticsearch": "^13.3.1",
+    "express": "^4.16.2",
+    "pg": "^7.3.0",
+    "sequelize": "^4.17.2"
   }
 }
