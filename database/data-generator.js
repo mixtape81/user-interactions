@@ -82,8 +82,8 @@ const triggerPlaylistView = (session) => {
     .then(() => udpateConstants())
     .then(() => fs.appendFileAsync(files.playlistViews, viewSQL))
     .then(() => fs.appendFileAsync(files.playlistViewsJSON, viewJSON))
-    .then(() => checkEntriesCount() ? updateDatabase() : null)
-    .then((value) => value ? feedElasticSearch() : null)
+    .then(() => (checkEntriesCount() ? updateDatabase() : null))
+    .then(value => (value ? feedElasticSearch() : null))
     .catch(err => console.log('error updating database in play list views', err));
 };
 
@@ -110,8 +110,8 @@ const triggerSearch = (session) => {
     .then(() => udpateConstants())
     .then(() => fs.appendFileAsync(files.searches, searchSQL))
     .then(() => fs.appendFileAsync(files.searchesJSON, searchJSON))
-    .then(() => checkEntriesCount() ? updateDatabase() : null)
-    .then((value) => value ? feedElasticSearch() : null)
+    .then(() => (checkEntriesCount() ? updateDatabase() : null))
+    .then(value => (value ? feedElasticSearch() : null))
     .catch(err => console.log('error updating database in search', err));
 };
 
@@ -142,8 +142,8 @@ const triggerSongReaction = (session) => {
     .then(() => udpateConstants())
     .then(() => fs.appendFileAsync(files.songReactions, songReactionSQL))
     .then(() => fs.appendFileAsync(files.songReactionsJSON, songReactionJSON))
-    .then(() => checkEntriesCount() ? updateDatabase() : null)
-    .then((value) => value ? feedElasticSearch() : null)
+    .then(() => (checkEntriesCount() ? updateDatabase() : null))
+    .then(value => (value ? feedElasticSearch() : null))
     .catch(err => console.log('error updating database in song reaction', err));
 };
 
@@ -174,8 +174,8 @@ const triggerSongResponse = (session) => {
     .then(() => udpateConstants())
     .then(() => fs.appendFileAsync(files.songResponses, songResponseSQL))
     .then(() => fs.appendFileAsync(files.songResponsesJSON, songResponseJSON))
-    .then(() => checkEntriesCount() ? updateDatabase() : null)
-    .then((value) => value ? feedElasticSearch() : null)
+    .then(() => (checkEntriesCount() ? updateDatabase() : null))
+    .then(value => (value ? feedElasticSearch() : null))
     .catch(err => console.log('error updating database in song response', err));
 };
 
@@ -313,11 +313,8 @@ const checkTimeForNow = (time) => {
     console.log('last time stamp per round', lastTimeStampPerRound ? new Date(lastTimeStampPerRound).toISOString() : undefined);
     round += 1;
     getSessions();
-    console.log('starting wait');
-    setTimeout(() => {}, 5000);
   }
 };
-
 
 const addMockData = () => {
   const interval = 200;
