@@ -3,8 +3,9 @@ const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index');
 const helpers = require('./data-helpers.js');
 const { updateDatabase } = require('./database-query');
-const { feedElasticSearch } = require('./database-query');
+const { feedElasticsearch } = require('./database-query');
 
+let usersWithSessions;
 let catchUpTillDate;
 let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
 let addTime;
@@ -15,6 +16,7 @@ let round = 1;
 let logId = 1;
 let count = 0;
 
+// check entries count to update database
 const checkEntriesCount = () => {
   if (count > 100000) {
     count = 1;
@@ -36,19 +38,17 @@ const generateLog = (date, session, event) => {
   return `${files.index}\n${JSON.stringify(obj)}\n`;
 };
 
-
 // this function updates logs
 const updateLogs = (json, sql) => (
   fs.appendFileAsync(files.logs, sql)
     .then(() => fs.appendFileAsync(files.logsJSON, json))
 );
 
-
-const udpateConstants = () => {
-  const values = JSON.stringify(helpers.usersWithSessions);
-  return fs.writeFileAsync(files.constants, values);
+const updateUserSessions = () => {
+  const users = [];
+  usersWithSessions.forEach(user => users.push(user));
+  return fs.writeFileAsync(files.users, users);
 };
-
 
 // this function triggers a playlist view
 const triggerPlaylistView = (session) => {
@@ -67,18 +67,17 @@ const triggerPlaylistView = (session) => {
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 1, ${Number(session[0])}),\n`;
   logId += 1;
   updateLogs(logJSON, logSQL)
-    .then(() => udpateConstants())
+    .then(() => updateUserSessions())
     .then(() => fs.appendFileAsync(files.playlistViews, viewSQL))
     .then(() => fs.appendFileAsync(files.playlistViewsJSON, viewJSON))
     .then(() => (checkEntriesCount() ? updateDatabase() : null))
-    .then(value => (value ? feedElasticSearch() : null))
+    .then(value => (value ? feedElasticsearch() : null))
     .catch(err => console.log('error updating database in play list views', err));
 };
 
-
 // this function triggers a genre searched
 const triggerSearch = (session) => {
-  const value = helpers.genres[helpers.generateRandomGenreId() - 1];
+  const value = helpers.generateRandomSearch();
   const date = helpers.parseDate(Number(session[2]));
   const search = {
     value,
@@ -92,14 +91,13 @@ const triggerSearch = (session) => {
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 2, ${Number(session[0])}),\n`;
   logId += 1;
   updateLogs(logJSON, logSQL)
-    .then(() => udpateConstants())
+    .then(() => updateUserSessions())
     .then(() => fs.appendFileAsync(files.searches, searchSQL))
     .then(() => fs.appendFileAsync(files.searchesJSON, searchJSON))
     .then(() => (checkEntriesCount() ? updateDatabase() : null))
-    .then(update => (update ? feedElasticSearch() : null))
+    .then(update => (update ? feedElasticsearch() : null))
     .catch(err => console.log('error updating database in search', err));
 };
-
 
 // this function triggers a song reaction (liked/disliked)
 const triggerSongReaction = (session) => {
@@ -120,14 +118,13 @@ const triggerSongReaction = (session) => {
   const logSQL = `(${Number(session[1])},'${date.date}', ${date.createdAt}, 3, ${Number(session[0])}),\n`;
   logId += 1;
   updateLogs(logJSON, logSQL)
-    .then(() => udpateConstants())
+    .then(() => updateUserSessions())
     .then(() => fs.appendFileAsync(files.songReactions, songReactionSQL))
     .then(() => fs.appendFileAsync(files.songReactionsJSON, songReactionJSON))
     .then(() => (checkEntriesCount() ? updateDatabase() : null))
-    .then(value => (value ? feedElasticSearch() : null))
+    .then(value => (value ? feedElasticsearch() : null))
     .catch(err => console.log('error updating database in song reaction', err));
 };
-
 
 // this function triggers a song response (heard/skippeds)
 const triggerSongResponse = (session) => {
@@ -148,18 +145,17 @@ const triggerSongResponse = (session) => {
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 4, ${Number(session[0])}),\n`;
   logId += 1;
   updateLogs(logJSON, logSQL)
-    .then(() => udpateConstants())
+    .then(() => updateUserSessions())
     .then(() => fs.appendFileAsync(files.songResponses, songResponseSQL))
     .then(() => fs.appendFileAsync(files.songResponsesJSON, songResponseJSON))
     .then(() => (checkEntriesCount() ? updateDatabase() : null))
-    .then(value => (value ? feedElasticSearch() : null))
+    .then(value => (value ? feedElasticsearch() : null))
     .catch(err => console.log('error updating database in song response', err));
 };
 
 const triggerSkip = () => {
   // console.log('triggered skip for this session', session);
 };
-
 
 // this function will initiate a trigger for a specific event for each session
 const triggerEventsOnSessions = (sessionsToTrigger) => {
@@ -177,7 +173,6 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
   });
 };
 
-
 // this function writes current sessions to sessions.txt
 const archiveSessions = (active) => {
   fs.truncateAsync(files.sessions)
@@ -185,7 +180,6 @@ const archiveSessions = (active) => {
     .then(() => triggerEventsOnSessions(active))
     .catch(err => console.log('error archiving sessions', err));
 };
-
 
 // this function generates a random end time for each session based on
 // start time (limit: 120 mins)
@@ -195,14 +189,13 @@ const generateRandomEndTime = (start) => {
   return time + sessionTime;
 };
 
-
 // this session adds a random milliseconds to session starts to keep them more unique
 const addRandomTime = () => {
   addTime = Math.floor(Math.random() * 10000);
   return addTime;
 };
 
-
+// update script with last session details
 const getLastTimeStampAndSessionId = (session) => {
   let sessionId = 0;
   let timeStamp = helpers.startInMilliseconds;
@@ -216,47 +209,38 @@ const getLastTimeStampAndSessionId = (session) => {
   return { timeStamp, sessionId };
 };
 
-
 // this function creates 500 random users each time it runs
 const generateRandomSessions = ({ timeStamp, sessionId }) => {
+  let id = sessionId;
   let start = timeStamp + helpers.generateRandomSeconds(50000, 200000);
   const sessionsToGenerate = helpers.averageSessionsPerDay(start);
-  // console.log('sessions to create', sessionsToGenerate);
   const sessions = [];
   for (let i = 0; i < sessionsToGenerate; i += 1) {
     const user = helpers.generateRandomUserId();
-    if (!helpers.usersWithSessions[user]) {
-      sessions.push(`${sessionId + 1}--${user}--${start + addRandomTime()}--${generateRandomEndTime(start)}`);
+    if (!usersWithSessions.has(user)) {
+      sessions.push(`${id + 1}--${user}--${start + addRandomTime()}--${generateRandomEndTime(start)}`);
       start += addTime + helpers.generateRandomSeconds(100, 1000);
-      helpers.usersWithSessions[user] = true;
+      usersWithSessions.add(user);
     }
-    sessionId += 1;
+    id += 1;
     lastTimeStamp = start;
   }
-  // console.log('sessions generated', sessions.length);
   lastTimeStampPerRound = lastTimeStamp + helpers.generateRandomSeconds(5000, 100000);
   lastSession = sessions.length ? sessions[sessions.length - 1] : lastSession;
   return sessions;
 };
 
-
+// extract last active session before generating new ones
 const generateAndProcessSessions = (active) => {
-  // console.log('active is', active.length);
-  // console.log('active last session is', active[active.length - 1]);
-  // console.log('last session is', lastSession);
   let current = active.length ? active[active.length - 1] : lastSession;
-  if (current. length < 35) {
-    const badSession = current;
-    // console.log('current is short', badSession);
+  if (current.length < 35) {
+    active.pop();
     current = lastSession;
   }
-  // console.log('current is', current);
   lastEntry = getLastTimeStampAndSessionId(current);
-  // console.log('last entry after processing is', lastEntry);
   const newSessions = generateRandomSessions(lastEntry);
   archiveSessions(active.concat(newSessions));
 };
-
 
 // this function finds all the active sessions, and then passes them to triggerEvents.
 const findActiveSessions = (sessions) => {
@@ -272,41 +256,51 @@ const findActiveSessions = (sessions) => {
 
   inactive.forEach((session) => {
     const details = helpers.parseSession(session);
-    delete helpers.usersWithSessions[details[1]];
+    usersWithSessions.delete(details[1]);
   });
   generateAndProcessSessions(active);
 };
 
-const assignConstants = (values) => {
-  const constants = values ? JSON.parse(values) : [];
-  helpers.usersWithSessions = constants[1] || {};
+// get users with sessions
+const getUsers = (values) => {
+  const users = values ? values.split(',') : [];
+  usersWithSessions = users.reduce((result, user) => {
+    result.add(Number(user));
+    return result;
+  }, new Set());
 };
 
+// get existing sessions before running script again
 const getSessions = () => {
-  fs.readFileAsync(files.constants)
-    .then(constants => assignConstants(constants ? constants.toString() : null))
+  fs.readFileAsync(files.users)
+    .then(users => getUsers(users ? users.toString() : null))
     .then(() => fs.readFileAsync(files.sessions))
     .then(sessions => findActiveSessions(sessions ? sessions.toString() : null))
     .catch(err => console.log('error reading sessions file', err));
 };
 
-
+// function to call at every interval
 const checkTimeForNow = (time) => {
   if (time > Date.now()) {
     clearInterval(catchUpTillDate);
-    process.exit();
+    updateDatabase()
+      .then(() => feedElasticsearch())
+      .then(() => process.exit())
+      .catch(err => console.log('error while ending script run', err));
   } else {
     console.log(`round number - ${round}`);
     console.log('last time stamp per round', lastTimeStampPerRound ? new Date(lastTimeStampPerRound).toISOString() : undefined);
+    console.log('count is ', count);
     round += 1;
     getSessions();
   }
 };
 
+// function to start script
 const addMockData = () => {
   catchUpTillDate = setInterval(() => {
     checkTimeForNow(lastTimeStamp);
-  }, 200);
+  }, 250);
 };
 
 addMockData();
