@@ -7,16 +7,18 @@ const { app } = require('../server/index.js');
 const request = supertest.agent(app);
 const elasticsearch = require('../elasticsearch/queries.js');
 // const { db } = require('../database/index.js');
-const random = require('../database/data-generator.js');
-const constants = require('../database/data-helpers.js');
+const random = require('../data-generation/data-generator.js');
+const constants = require('../data-generation/data-helpers.js');
 const { sessions } = require('./dummy-sessions.js');
 const fs = require('fs');
 const path = require('path');
+const AWS = require('../server-aws/index.js');
+const AWSQueries = require('../server-aws/aws-queries.js');
 
 
 // ************SERVER CONNECTION TESTS ************** //
 
-describe('server connection test', () => {
+xdescribe('server connection test', () => {
   beforeEach(() => {
     const server = app.listen(process.env.PORT);
     afterEach(() => {
@@ -25,7 +27,7 @@ describe('server connection test', () => {
   });
 });
 
-describe('/', () => {
+xdescribe('/', () => {
   it('should return 200 as response to /', (done) => {
     request
       .get('/')
@@ -49,7 +51,7 @@ describe('/', () => {
 
 // *************** DATABASE QUERY TESTS ********************* //
 
-describe('Execute queries accurately', () => {
+xdescribe('Execute queries accurately', () => {
   it('should add data to playlist views', (done) => {
     const session = sessions[2].split('--');
     const view = {
@@ -220,7 +222,7 @@ describe('Execute queries accurately', () => {
 
 // ***************DATA GENERATOR TESTS ********************//
 
-describe('Test mock data functions', () => {
+xdescribe('Test mock data functions', () => {
   it('should generate a random sessions', (done) => {
     const time = {
       timeStamp: Date.now(),
@@ -338,10 +340,11 @@ describe('Test mock data functions', () => {
       }
     });
   });
+});
 
     // ************************* TESTS FOR ELASTIC SEARCG ******************************* //
 
-  describe('Tests for elasticsearch', () => {
+  xdescribe('Tests for elasticsearch', () => {
     //add tests for elastic search
     it('should create an index', (done) => {
 
@@ -363,4 +366,77 @@ describe('Test mock data functions', () => {
 
     });
   })
+
+  // ********************************** AWS SQS TESTS ************************************** //
+
+describe('AWS SQS Tests', () => {
+  let messageToDelete;
+  it('shoud connect to AWS and return list of queues', (done) => {
+    AWS.checkConnectionByFetchingQueues({})
+      .then((data) => {
+        expect(data.QueueUrls[0]).to.equal(process.env.AWS_URL);
+        done();
+      }).catch((err) => {
+        console.error('error connectiong to AWS', err);
+        done();
+      });
+  });
+
+  it('should send a sql data set to AWS SQS Queue', (done) => {
+    const message = "(3126, '2017-08-01', 1501630488185, 3, 6263),";
+    AWSQueries.sendMessage(message)
+      .then((data) => {
+        expect(data.MessageId).to.not.equal(undefined);
+        done();
+      }).catch((err) => {
+        console.error('error sending sql data set to AWS', err);
+        done();
+      });
+  });
+
+  it('shoud send a json message to AWS SQS Queue', (done) => {
+    const json = '{"user_id":22201,"sessionId":6277,"eventTypeId":1,"date":"2017- 08 - 01","createdAt":"1501631930534"}';
+    AWSQueries.sendMessage(json)
+      .then((data) => {
+        expect(data.MessageId).to.not.equal(undefined);
+        done();
+      }).catch((err) => {
+        console.error('error sending json message to AWS', err);
+        done();
+      });
+  });
+
+  it('should receive one message from AWS SQS', (done) => {
+    const params = {
+      QueueUrl: process.env.AWS_URL,
+      MaxNumberOfMessages: 1
+    };
+
+    AWSQueries.getMessages(params)
+      .then((data) => {
+        messageToDelete = data.Messages[0].ReceiptHandle;
+        expect(data.Messages.length).to.equal(1);
+        expect(data.Messages[0].MessageId).to.not.equal(undefined);
+        expect(data.Messages[0].ReceiptHandle).to.not.equal(undefined);
+        done();
+      }).catch((err) => {
+        console.error('error getting one message from AWS', err);
+        done();
+      });
+  });
+
+  it('should delete messages from AWS SQS', (done) => {
+    const params = {
+      QueueUrl: process.env.AWS_URL,
+      ReceiptHandle: messageToDelete
+    };
+    AWSQueries.deleteMessage(params)
+      .then((data) => {
+        expect(data.ResponseMetadata).to.not.equal(undefined);
+        done();
+      }).catch((err) => {
+        console.error('error deleting a messages from AWS', err);
+        done();
+      });
+  });
 });

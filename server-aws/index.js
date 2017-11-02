@@ -11,8 +11,13 @@ const config = {
 const sqs = new AWS.SQS(config); 
 
 // If list is received, connection was successful and established
-const getQs = sqs.listQueues({}).promise();
-getQs.then(response => console.log('received list of queues', response))
-  .catch(err => console.error('error getting queues from AWS SQS', err));
-
-module.exports = sqs;
+const checkConnectionByFetchingQueues = (params) => {
+  const getQs = sqs.listQueues(params).promise();
+  return getQs.then(response => response)
+    .catch(err => console.error('error getting queues from AWS SQS', err));
+}
+ 
+module.exports = {
+  sqs,
+  checkConnectionByFetchingQueues
+};

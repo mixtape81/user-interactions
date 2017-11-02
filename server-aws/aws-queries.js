@@ -1,25 +1,25 @@
-const sqs = require('./');
+const { sqs } = require('./');
 
 const queueUrl = process.env.AWS_URL;
 
 // add permissions for queue on AWS SQS
 const addPermissionsForQueue = (params) => {
   const addPermissions = sqs.addPermissionAsync(params).promise();
-  addPermissions.then(data => console.log('data received after adding permissions', data))
+  return addPermissions.then(data => console.log('data received after adding permissions', data))
     .catch(err => console.error('error adding permissions AWS SQS queue', err));
 };
 
 // create a queue if needed on AWS SQS
 const createQueue = (params) => {
   const createQ = sqs.createQueue(params).promise();
-  createQ.then(data => console.log('created AWS SQS queue', data))
+  return createQ.then(data => console.log('created AWS SQS queue', data))
     .catch(err => console.error('error creating AWS SQS queue', err));
 };
 
 // get messages from a queue
 const getMessages = (params) => {
   const receiveMessage = sqs.receiveMessage(params).promise();
-  receiveMessage.then(data => console.log('received messages from queue', data))
+  return receiveMessage.then(data => data)
     .catch(err => console.error('error receiving messages from queue', err));
 };
 
@@ -30,15 +30,22 @@ const sendMessage = (message, url = queueUrl) => {
     QueueUrl: url
   };
   const sendData = sqs.sendMessage(params).promise();
-  sendData
-    .then(data => console.log('sent message to queue', data))
+  return sendData.then(data => data)
     .catch(err => console.error('error sending messages to queue', err));
+};
+
+// get messages from a queue
+const deleteMessage = (params) => {
+  const deleteMsg = sqs.deleteMessage(params).promise();
+  return deleteMsg.then(data => data)
+    .catch(err => console.error('error deleting message from queue', err));
 };
 
 module.exports = {
   addPermissionsForQueue,
   createQueue,
   getMessages,
-  sendMessage
+  sendMessage,
+  deleteMessage
 };
 
