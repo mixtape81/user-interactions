@@ -2,7 +2,7 @@ const { client } = require('./');
 
 // can use promises instead of callbacks
 
-const addDocumentsinBulk = (index, type, body) => client.bulk({ index, type, body });
+const addDocumentsInBulk = (index, type, body) => client.bulk({ index, type, body });
 
  // client.index({
  //     index: 'blog',
@@ -19,5 +19,5 @@ const addDocumentsinBulk = (index, type, body) => client.bulk({ index, type, bod
 
 
 module.exports = {
-  addDocumentsinBulk
+  addDocumentsInBulk
 };
