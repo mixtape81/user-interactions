@@ -1,11 +1,14 @@
+/* eslint-env mocha */
+
 require('../environment.js');
 const supertest = require('supertest');
 const { expect } = require('chai');
 const { app } = require('../server/index.js');
 const request = supertest.agent(app);
+const elasticsearch = require('../elasticsearch/queries.js');
 // const { db } = require('../database/index.js');
 const random = require('../database/data-generator.js');
-const constants = require('../database/data-gen-constants.js');
+const constants = require('../database/data-helpers.js');
 const { sessions } = require('./dummy-sessions.js');
 const fs = require('fs');
 const path = require('path');
@@ -62,7 +65,7 @@ describe('Execute queries accurately', () => {
       .send(view)
       .then((result) => {
         expect(result.body.genre_id).to.equal(view.genre_id);
-        expect(result.body.logId).to.exist;
+        expect(result.body.logId).to.not.equal(undefined);
         expect(result.statusCode).to.equal(200);
         done();
       })
@@ -84,7 +87,7 @@ describe('Execute queries accurately', () => {
       .send(searched)
       .then((result) => {
         expect(result.body.value).to.equal(searched.value);
-        expect(result.body.logId).to.exist;
+        expect(result.body.logId).to.not.equal(undefined);
         expect(result.statusCode).to.equal(200);
         done();
       })
@@ -109,7 +112,7 @@ describe('Execute queries accurately', () => {
       .then((result) => {
         expect(result.body.song_id).to.equal(response.song_id);
         expect(result.body.playlist_id).to.equal(response.playlist_id);
-        expect(result.body.logId).to.exist;
+        expect(result.body.logId).to.not.equal(undefined);
         expect(result.statusCode).to.equal(200);
         done();
       })
@@ -134,7 +137,7 @@ describe('Execute queries accurately', () => {
       .then((result) => {
         expect(result.body.song_id).to.equal(reaction.song_id);
         expect(result.body.playlist_id).to.equal(reaction.playlist_id);
-        expect(result.body.logId).to.exist;
+        expect(result.body.logId).to.not.equal(undefined);
         expect(result.statusCode).to.equal(200);
         done();
       })
@@ -335,4 +338,29 @@ describe('Test mock data functions', () => {
       }
     });
   });
+
+    // ************************* TESTS FOR ELASTIC SEARCG ******************************* //
+
+  describe('Tests for elasticsearch', () => {
+    //add tests for elastic search
+    it('should create an index', (done) => {
+
+    });
+
+    it('should delete an index', (done) => {
+
+    });
+
+    it('should add a document to an index', (done) => {
+
+    });
+
+    it('should add documents in bulk to an index', (done) => {
+
+    });
+
+    it ('should retreieve documents from an index', (done) => {
+
+    });
+  })
 });

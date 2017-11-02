@@ -1,7 +1,6 @@
-const usersWithSessions = {};
+let usersWithSessions;
 const startDate = new Date('2017-08-01T10:00:06.420Z').toISOString(); // 10 am UTC;
 const startInMilliseconds = 1501581638000;
-let count = 1;
 
 const genres = [
   'Rock and Roll',
@@ -122,7 +121,7 @@ const averageSessionsPerDay = (timeStamp) => {
   sessions = sessions < 1 ? 1 : sessions;
   const variation = [true, false][generateRandomIndex()];
   const random = generateCountforSessions();
-  const value = variation ? Math.floor(previous + random * 1.5) : (previous - random);
+  const value = variation ? Math.floor(previous + (random * 1.5)) : (previous - random);
   dayEstimates[day] = value < 1 ? value * -1 : value;
   return sessions;
 };
@@ -145,7 +144,7 @@ const eventProbabilites = (n) => {
 
 const playlistProbabilities = (n) => {
   // implement probability for playlists
-}
+};
 
 const genreProbabilities = (n) => {
   // implement genre probablity
