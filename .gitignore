@@ -42,10 +42,9 @@ node_modules/
 bower_components/
 
 # Generated Data files
-data-generation/jsons/*.json
-data-generation/sql-files/*.sql
-data-generation/text/sessions.txt
-data-generation/text/constants.json
+data-generation/jsons/
+data-generation/sql-files/
+data-generation/text/
 
-* Amazon config
+# Amazon config
 awsconfig.json
