@@ -18,7 +18,7 @@ const playlistViewsJSON = path.join(__dirname, './jsons/playlist-views.json');
 const index = JSON.stringify({ index: {} });
 
 // text file that contains all the constants for data generator
-const constants = path.join(__dirname, './text/constants.json');
+const users = path.join(__dirname, './text/users.txt');
 
 // text file to store sessions temporarily
 const sessions = path.join(__dirname, './text/sessions.txt');
@@ -36,5 +36,5 @@ module.exports = {
   playlistViewsJSON,
   sessions,
   index,
-  constants
+  users
 };
