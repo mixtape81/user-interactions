@@ -2,11 +2,11 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index');
 const helpers = require('./data-helpers.js');
-const { updateDatabase } = require('./database-query');
-const { feedElasticsearch } = require('./database-query');
+const queries = require('./data-queries.js');
 
 let usersWithSessions;
 let catchUpTillDate;
+let runEveryHour;
 let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
 let addTime;
 let lastEntry;
@@ -55,9 +55,13 @@ const updateFiles = (jsonFile, sqlFile, json, sql, event) => {
   return updateUserSessions()
     .then(() => fs.appendFileAsync(jsonFile, json))
     .then(() => fs.appendFileAsync(sqlFile, sql))
-    .then(() => (checkEntriesCount() ? updateDatabase() : null))
+    .then(() => (checkEntriesCount() ? queries.updateDatabase() : null))
     .catch(err => console.log(`error updating database in ${event}`, err));
 };
+
+const updateAWS = () => {
+  // queries.sendTtoSQS
+}
 
 // this function triggers a playlist view
 const triggerPlaylistView = (session) => {
@@ -276,9 +280,15 @@ const getSessions = () => {
 const checkTimeForNow = (time) => {
   if (time > Date.now()) {
     clearInterval(catchUpTillDate);
-    updateDatabase()
-      .then(() => feedElasticsearch())
-      .then(() => process.exit())
+    queries.updateDatabase()
+      .then(() => {
+        console.log('last time stamp when time is current is', lastTimeStamp);
+        process.exit();
+        // runEveryHour = setInterval(() => {
+        //   checkTimeForNow(lastTimeStamp)
+        // }, 3600000);
+
+      })
       .catch(err => console.log('error while ending script run', err));
   } else {
     console.log(`round number - ${round}`);

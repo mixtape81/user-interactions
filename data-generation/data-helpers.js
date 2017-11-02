@@ -28,7 +28,6 @@ const playlists = {
   10: [19, 20]
 };
 
-
 const dayEstimates = {
   1: 100, // 100000
   2: 84, // 45980 // 90000
@@ -141,11 +140,11 @@ const eventProbabilites = (n) => {
 };
 
 const playlistProbabilities = (n) => {
-  // implement probability for playlists
+  // TODO: implement probability for playlists
 };
 
 const genreProbabilities = (n) => {
-  // implement genre probablity
+  // TODO: implement genre probablity
 };
 
 const parseDate = (date) => {

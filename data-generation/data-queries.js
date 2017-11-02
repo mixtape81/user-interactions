@@ -3,6 +3,24 @@ const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index.js');
 const db = require('../database/queries.js');
 const { addDocumentsInBulk } = require('../elasticsearch/queries');
+const SQS = require('../server-aws/aws-queries.js');
+
+
+// ******************************** HELPERS FUNCTIONS ************************************ //
+const formatData = data => data.toString().replace(/,\n$/, '\n');
+
+const readFile = file => (
+  fs.readFileAsync(file)
+    .catch(err => console.log(`error reading file ${file}`, err))
+);
+
+const emptyFile = file => (
+  fs.truncateAsync(file)
+    .catch(err => console.log(`error emptying contents in file ${file}`, err))
+);
+
+
+// *************************** DATABASE && ELASTICSEARH QUERIES ************************* //
 
 const insertQueries = {
   logs: 'INSERT INTO logs (user_id, date, "createdAt", "eventTypeId", "sessionId") VALUES',
@@ -12,25 +30,17 @@ const insertQueries = {
   responses: 'INSERT INTO song_responses (song_id, "listenedTo", playlist_id, genre_id, "date", "createdAt", "logId") VALUES'
 };
 
-const formatData = data => data.toString().replace(/,\n$/, '\n');
-
 const updateTable = (query, file) => (
-  fs.readFileAsync(file)
-    .then((data) => {
-      const parsed = formatData(data);
-      return db.queryDB(`${query} ${parsed}`);
-    })
-    .then(() => fs.truncateAsync(file))
+  readFile(file)
+    .then(data => db.queryDB(`${query} ${formatData(data)}`))
+    .then(() => emptyFile(file))
     .catch(err => console.log(`error updating table with file ${file}`, err))
 );
 
 const feedOneIndexTypeInElasticsearch = (file, type) => (
-  fs.readFileAsync(file)
-    .then((data) => {
-      addDocumentsInBulk(process.env.INDEX, type, data.toString());
-      return null;
-    })
-    .then(() => fs.truncate(file))
+  readFile(file)
+    .then(data => addDocumentsInBulk(process.env.INDEX, type, data.toString()))
+    .then(() => emptyFile(file))
     .catch(err => console.error(`error updating ${process.env.INDEX} ${type}`, err))
 );
 
@@ -57,8 +67,28 @@ const updateDatabase = () => (
     .catch(err => console.log('error updating all tables in database', err))
 );
 
+
+// ******************************** AWS SQS QUERIES **************************** //
+
+const sendDatabaseContentToSQS = file => (
+  readFile(file)
+    .then(data => SQS.sendMessage(data))
+    .then(() => emptyFile(file))
+    .catch(err => console.log(`error sending ${file} data to SQS`, err))
+);
+
+const sendElasticsearchContentToSQS = file => (
+  readFile(file)
+    .then(data => SQS.sendMessage(data.toString()))
+    .then(() => emptyFile(file))
+    .catch(err => console.log(`error sending ${file} data to SQS`, err))
+);
+
 module.exports = {
   updateDatabase,
-  feedElasticsearch
+  feedElasticsearch,
+  formatData,
+  sendDatabaseContentToSQS,
+  sendElasticsearchContentToSQS
 };
 
