@@ -24,19 +24,6 @@ const updateTable = (query, file) => (
     .catch(err => console.log(`error updating table with file ${file}`, err))
 );
 
-const updateDatabase = () => (
-  updateTable(insertQueries.logs, files.logs)
-    .then(() => updateTable(insertQueries.views, files.playlistViews))
-    .then(() => updateTable(insertQueries.searches, files.searches))
-    .then(() => updateTable(insertQueries.reactions, files.songReactions))
-    .then(() => updateTable(insertQueries.responses, files.songResponses))
-    .then(() => {
-      console.log('updated database!!!!!!');
-      return feedElasticsearch();
-    })
-    .catch(err => console.log('error updating all tables in database', err))
-);
-
 const feedOneIndexTypeInElasticsearch = (file, type) => (
   fs.readFileAsync(file)
     .then((data) => {
@@ -55,6 +42,19 @@ const feedElasticsearch = () => (
     .then(() => feedOneIndexTypeInElasticsearch(files.songResponsesJSON, 'songresponses'))
     .then(() => console.log('updated elasticsearch!!!!!!!'))
     .catch(err => console.error('error updating elastic search index', err))
+);
+
+const updateDatabase = () => (
+  updateTable(insertQueries.logs, files.logs)
+    .then(() => updateTable(insertQueries.views, files.playlistViews))
+    .then(() => updateTable(insertQueries.searches, files.searches))
+    .then(() => updateTable(insertQueries.reactions, files.songReactions))
+    .then(() => updateTable(insertQueries.responses, files.songResponses))
+    .then(() => {
+      console.log('updated database!!!!!!');
+      return feedElasticsearch();
+    })
+    .catch(err => console.log('error updating all tables in database', err))
 );
 
 module.exports = {
