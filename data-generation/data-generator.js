@@ -18,7 +18,7 @@ let count = 0;
 
 // check entries count to update database
 const checkEntriesCount = () => {
-  if (count > 100000) {
+  if (count > 5000) {
     count = 1;
     return true;
   }
@@ -50,6 +50,15 @@ const updateUserSessions = () => {
   return fs.writeFileAsync(files.users, users);
 };
 
+// this function updates the files with the event info 
+const updateFiles = (jsonFile, sqlFile, json, sql, event) => {
+  return updateUserSessions()
+    .then(() => fs.appendFileAsync(jsonFile, json))
+    .then(() => fs.appendFileAsync(sqlFile, sql))
+    .then(() => (checkEntriesCount() ? updateDatabase() : null))
+    .catch(err => console.log(`error updating database in ${event}`, err));
+};
+
 // this function triggers a playlist view
 const triggerPlaylistView = (session) => {
   const list = helpers.generateRandomPlaylistInfo();
@@ -61,18 +70,14 @@ const triggerPlaylistView = (session) => {
     createdAt: date.createdAt,
     logId
   };
-  const logJSON = generateLog(date, session, 1);
-  const viewJSON = `${files.index}\n${JSON.stringify(view)}\n`;
-  const viewSQL = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
+  const json = `${files.index}\n${JSON.stringify(view)}\n`;
+  const sql = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 1, ${Number(session[0])}),\n`;
+  const logJSON = generateLog(date, session, 1);
   logId += 1;
-  updateLogs(logJSON, logSQL)
-    .then(() => updateUserSessions())
-    .then(() => fs.appendFileAsync(files.playlistViews, viewSQL))
-    .then(() => fs.appendFileAsync(files.playlistViewsJSON, viewJSON))
-    .then(() => (checkEntriesCount() ? updateDatabase() : null))
-    .then(value => (value ? feedElasticsearch() : null))
-    .catch(err => console.log('error updating database in play list views', err));
+
+  return updateLogs(logJSON, logSQL)
+    .then(() => updateFiles(files.playlistViewsJSON, files.playlistViews, json, sql, 'playlistviews'));
 };
 
 // this function triggers a genre searched
@@ -85,18 +90,14 @@ const triggerSearch = (session) => {
     createdAt: date.createdAt,
     logId
   };
+  const json = `${files.index}\n${JSON.stringify(search)}\n`;
+  const sql = `('${value}','${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logJSON = generateLog(date, session, 2);
-  const searchJSON = `${files.index}\n${JSON.stringify(search)}\n`;
-  const searchSQL = `('${value}','${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 2, ${Number(session[0])}),\n`;
   logId += 1;
-  updateLogs(logJSON, logSQL)
-    .then(() => updateUserSessions())
-    .then(() => fs.appendFileAsync(files.searches, searchSQL))
-    .then(() => fs.appendFileAsync(files.searchesJSON, searchJSON))
-    .then(() => (checkEntriesCount() ? updateDatabase() : null))
-    .then(update => (update ? feedElasticsearch() : null))
-    .catch(err => console.log('error updating database in search', err));
+
+  return updateLogs(logJSON, logSQL)
+    .then(() => updateFiles(files.searchesJSON, files.searches, json, sql, 'searches'));
 };
 
 // this function triggers a song reaction (liked/disliked)
@@ -112,18 +113,14 @@ const triggerSongReaction = (session) => {
     createdAt: date.createdAt,
     logId
   };
+  const json = `${files.index}\n${JSON.stringify(songReaction)}\n`;
+  const sql = `(${helpers.generateRandomSongId()}, ${helpers.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logJSON = generateLog(date, session, 3);
-  const songReactionJSON = `${files.index}\n${JSON.stringify(songReaction)}\n`;
-  const songReactionSQL = `(${helpers.generateRandomSongId()}, ${helpers.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])},'${date.date}', ${date.createdAt}, 3, ${Number(session[0])}),\n`;
   logId += 1;
-  updateLogs(logJSON, logSQL)
-    .then(() => updateUserSessions())
-    .then(() => fs.appendFileAsync(files.songReactions, songReactionSQL))
-    .then(() => fs.appendFileAsync(files.songReactionsJSON, songReactionJSON))
-    .then(() => (checkEntriesCount() ? updateDatabase() : null))
-    .then(value => (value ? feedElasticsearch() : null))
-    .catch(err => console.log('error updating database in song reaction', err));
+
+  return updateLogs(logJSON, logSQL)
+    .then(() => updateFiles(files.songReactionsJSON, files.songReactions, json, sql, 'song reactions'));
 };
 
 // this function triggers a song response (heard/skippeds)
@@ -139,22 +136,18 @@ const triggerSongResponse = (session) => {
     createdAt: date.createdAt,
     logId
   };
+  const json = `${files.index}\n${JSON.stringify(songResponse)}\n`;
+  const sql = `(${helpers.generateRandomSongId()}, ${helpers.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logJSON = generateLog(date, session, 4);
-  const songResponseJSON = `${files.index}\n${JSON.stringify(songResponse)}\n`;
-  const songResponseSQL = `(${helpers.generateRandomSongId()}, ${helpers.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
   const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 4, ${Number(session[0])}),\n`;
   logId += 1;
-  updateLogs(logJSON, logSQL)
-    .then(() => updateUserSessions())
-    .then(() => fs.appendFileAsync(files.songResponses, songResponseSQL))
-    .then(() => fs.appendFileAsync(files.songResponsesJSON, songResponseJSON))
-    .then(() => (checkEntriesCount() ? updateDatabase() : null))
-    .then(value => (value ? feedElasticsearch() : null))
-    .catch(err => console.log('error updating database in song response', err));
+
+  return updateLogs(logJSON, logSQL)
+    .then(() => updateFiles(files.songResponsesJSON, files.songResponses, json, sql, 'song responses'));
 };
 
 const triggerSkip = () => {
-  // console.log('triggered skip for this session', session);
+  // do nothing here
 };
 
 // this function will initiate a trigger for a specific event for each session

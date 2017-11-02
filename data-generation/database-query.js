@@ -32,7 +32,7 @@ const updateDatabase = () => (
     .then(() => updateTable(insertQueries.responses, files.songResponses))
     .then(() => {
       console.log('updated database!!!!!!');
-      return 'DONE';
+      return feedElasticsearch();
     })
     .catch(err => console.log('error updating all tables in database', err))
 );
