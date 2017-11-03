@@ -15,6 +15,8 @@ let lastTimeStampPerRound;
 let round = 1;
 let logId = 1;
 let count = 0;
+let addToDB = true;
+let addToAWS = false;
 
 // check entries count to update database
 const checkEntriesCount = () => {
@@ -55,7 +57,7 @@ const updateFiles = (jsonFile, sqlFile, json, sql, event) => {
   return updateUserSessions()
     .then(() => fs.appendFileAsync(jsonFile, json))
     .then(() => fs.appendFileAsync(sqlFile, sql))
-    // .then(() => (checkEntriesCount() ? queries.updateDatabase() : null))
+    .then(() => (checkEntriesCount() && addToDB ? queries.updateDatabase() : null))
     .catch(err => console.log(`error updating database in ${event}`, err));
 };
 
@@ -166,7 +168,7 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
     events[event](helpers.parseSession(session));
   });
 
-  return queries.updateAWS();
+  return addToAWS ? queries.updateAWS() : null
 };
 
 // this function writes current sessions to sessions.txt
@@ -279,7 +281,6 @@ const getSessions = () => {
 const checkTimeForNow = (time) => {
   if (time > Date.now()) {
     clearInterval(catchUpTillDate);
-    // queries.updateAWS()
     queries.updateDatabase()
       .then(() => {
         console.log('last time stamp when time is current is', lastTimeStamp);
@@ -299,11 +300,13 @@ const checkTimeForNow = (time) => {
   }
 };
 
+const 
+
 // function to start script
 const addMockData = () => {
   catchUpTillDate = setInterval(() => {
     checkTimeForNow(lastTimeStamp);
-  }, 7000);
+  }, 250);
 };
 
 addMockData();
