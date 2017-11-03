@@ -1,6 +1,8 @@
 // **** startDate **** new Date('2017-08-01T10:00:06.420Z').toISOString() ***** 10 am UTC**** //
 
 const startInMilliseconds = 1501581638000; // 10 am UTC in milliseconds
+const timeToday = 1509661839005; // Nov 2  3:30 pm PDT
+
 
 const genres = [
   'Rock and Roll',

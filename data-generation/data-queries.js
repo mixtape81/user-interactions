@@ -9,17 +9,6 @@ const SQS = require('../server-aws/aws-queries.js');
 // ******************************** HELPERS FUNCTIONS ************************************ //
 const formatData = data => data.toString().replace(/,\n$/, '\n');
 
-const readFile = file => (
-  fs.readFileAsync(file)
-    .catch(err => console.log(`error reading file ${file}`, err))
-);
-
-const emptyFile = file => (
-  fs.truncateAsync(file)
-    .catch(err => console.log(`error emptying contents in file ${file}`, err))
-);
-
-
 // *************************** DATABASE && ELASTICSEARH QUERIES ************************* //
 
 const insertQueries = {
@@ -31,16 +20,16 @@ const insertQueries = {
 };
 
 const updateTable = (query, file) => (
-  readFile(file)
+  fs.readFileAsync(file)
     .then(data => db.queryDB(`${query} ${formatData(data)}`))
-    .then(() => emptyFile(file))
+    .then(() => fs.truncateAsync(file))
     .catch(err => console.log(`error updating table with file ${file}`, err))
 );
 
 const feedOneIndexTypeInElasticsearch = (file, type) => (
-  readFile(file)
+  fs.readFileAsync(file)
     .then(data => addDocumentsInBulk(process.env.INDEX, type, data.toString()))
-    .then(() => emptyFile(file))
+    .then(() => fs.truncateAsync(file))
     .catch(err => console.error(`error updating ${process.env.INDEX} ${type}`, err))
 );
 
@@ -70,25 +59,67 @@ const updateDatabase = () => (
 
 // ******************************** AWS SQS QUERIES **************************** //
 
-const sendDatabaseContentToSQS = file => (
-  readFile(file)
-    .then(data => SQS.sendMessage(data))
-    .then(() => emptyFile(file))
+const url = process.env.AWS_URL;
+
+const sendContentToSQS = (file, table) => (
+  fs.readFileAsync(file)
+    .then((data) => {
+      const message = {
+        MessageBody: formatData(data),
+        QueueUrl: url,
+        MessageAttributes: {
+          table: {
+            DataType: 'String',
+            StringValue: table
+          }
+        }
+      };
+      return SQS.sendMessage(message);
+    })
+    .then(() => fs.truncateAsync(file))
     .catch(err => console.log(`error sending ${file} data to SQS`, err))
 );
 
-const sendElasticsearchContentToSQS = file => (
-  readFile(file)
-    .then(data => SQS.sendMessage(data.toString()))
-    .then(() => emptyFile(file))
+const sendJSONtoSQS = (file, type) => (
+  fs.readFileAsync(file)
+    .then((data) => {
+      const message = {
+        MessageBody: data.toString(),
+        QueueUrl: url,
+        MessageAttributes: {
+          index: {
+            DataType: 'String',
+            StringValue: process.env.INDEX
+          },
+          type: {
+            DataType: 'String',
+            StringValue: type
+          }
+        }
+      };
+      return SQS.sendMessage(message);
+    })
+    .then(() => fs.truncateAsync(file))
     .catch(err => console.log(`error sending ${file} data to SQS`, err))
+);
+
+const updateAWS = () => (
+  sendContentToSQS(files.logs, 'logs')
+    .then(() => sendContentToSQS(files.playlistViews, 'playlistviews'))
+    .then(() => sendContentToSQS(files.searches, 'searches'))
+    .then(() => sendContentToSQS(files.songReactions, 'songreactions'))
+    .then(() => sendContentToSQS(files.songResponses, 'songresponses'))
+    .then(() => sendJSONtoSQS(files.logsJSON, 'logs'))
+    .then(() => sendJSONtoSQS(files.playlistViewsJSON, 'playlistviews'))
+    .then(() => sendJSONtoSQS(files.searchesJSON, 'searches'))
+    .then(() => sendJSONtoSQS(files.songReactionsJSON, 'songreactions'))
+    .then(() => sendJSONtoSQS(files.songResponsesJSON, 'songresponses'))
+    .then(() => console.log('SENT DATA TO AMAZON SQS'))
+    .catch(err => console.log('error sending data to SQS', err))
 );
 
 module.exports = {
   updateDatabase,
-  feedElasticsearch,
-  formatData,
-  sendDatabaseContentToSQS,
-  sendElasticsearchContentToSQS
+  updateAWS
 };
 

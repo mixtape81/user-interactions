@@ -24,14 +24,10 @@ const getMessages = (params) => {
 };
 
 // send messages to a queue
-const sendMessage = (message, url = queueUrl) => {
-  const params = {
-    MessageBody: message,
-    QueueUrl: url
-  };
-  const sendData = sqs.sendMessage(params).promise();
+const sendMessage = (message) => {
+  const sendData = sqs.sendMessage(message).promise();
   return sendData.then(data => data)
-    .catch(err => console.error('error sending messages to queue', err));
+    // .catch(err => console.error('error sending messages to queue', err));
 };
 
 // get messages from a queue

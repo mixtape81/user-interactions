@@ -346,23 +346,11 @@ xdescribe('Test mock data functions', () => {
 
   xdescribe('Tests for elasticsearch', () => {
     //add tests for elastic search
-    it('should create an index', (done) => {
-
-    });
-
-    it('should delete an index', (done) => {
-
-    });
-
     it('should add a document to an index', (done) => {
 
     });
 
     it('should add documents in bulk to an index', (done) => {
-
-    });
-
-    it ('should retreieve documents from an index', (done) => {
 
     });
   })
@@ -383,7 +371,11 @@ describe('AWS SQS Tests', () => {
   });
 
   it('should send a sql data set to AWS SQS Queue', (done) => {
-    const message = "(3126, '2017-08-01', 1501630488185, 3, 6263),";
+    const message = {
+      MessageBody: "(3126, '2017-08-01', 1501630488185, 3, 6263),",
+      QueueUrl: process.env.AWS_URL
+    };
+
     AWSQueries.sendMessage(message)
       .then((data) => {
         expect(data.MessageId).to.not.equal(undefined);
@@ -395,7 +387,10 @@ describe('AWS SQS Tests', () => {
   });
 
   it('shoud send a json message to AWS SQS Queue', (done) => {
-    const json = '{"user_id":22201,"sessionId":6277,"eventTypeId":1,"date":"2017- 08 - 01","createdAt":"1501631930534"}';
+    const json = {
+      MessageBody: '{"user_id":22201,"sessionId":6277,"eventTypeId":1,"date":"2017- 08 - 01","createdAt":"1501631930534"}',
+      QueueUrl: process.env.AWS_URL
+    };
     AWSQueries.sendMessage(json)
       .then((data) => {
         expect(data.MessageId).to.not.equal(undefined);
