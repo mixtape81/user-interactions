@@ -15,11 +15,10 @@ let lastTimeStampPerRound;
 let round = 1;
 let logId = 1;
 let count = 0;
-let limit = 2000;
 
 // check entries count to update database
 const checkEntriesCount = () => {
-  if (count > limit) {
+  if (count > 100000) {
     count = 1;
     return true;
   }
@@ -56,9 +55,7 @@ const updateFiles = (jsonFile, sqlFile, json, sql, event) => {
   return updateUserSessions()
     .then(() => fs.appendFileAsync(jsonFile, json))
     .then(() => fs.appendFileAsync(sqlFile, sql))
-    // .then(() => queries.updateAWS())
     // .then(() => (checkEntriesCount() ? queries.updateDatabase() : null))
-    // .then(() => (checkEntriesCount() ? queries.updateAWS() : null))
     .catch(err => console.log(`error updating database in ${event}`, err));
 };
 
@@ -282,8 +279,8 @@ const getSessions = () => {
 const checkTimeForNow = (time) => {
   if (time > Date.now()) {
     clearInterval(catchUpTillDate);
-    queries.updateAWS()
-    // queries.updateDatabase()
+    // queries.updateAWS()
+    queries.updateDatabase()
       .then(() => {
         console.log('last time stamp when time is current is', lastTimeStamp);
         process.exit();
