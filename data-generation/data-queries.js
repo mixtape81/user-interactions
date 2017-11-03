@@ -23,7 +23,7 @@ const updateTable = (query, file) => (
   fs.readFileAsync(file)
     .then(data => db.queryDB(`${query} ${formatData(data)}`))
     .then(() => fs.truncateAsync(file))
-    .catch(err => console.log(`error updating table with file ${file}`, err))
+    .catch(err => console.error(`error updating table with file ${file}`, err))
 );
 
 const feedOneIndexTypeInElasticsearch = (file, type) => (
@@ -53,7 +53,7 @@ const updateDatabase = () => (
       console.log('updated database!!!!!!');
       return feedElasticsearch();
     })
-    .catch(err => console.log('error updating all tables in database', err))
+    .catch(err => console.error('error updating all tables in database', err))
 );
 
 

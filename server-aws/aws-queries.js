@@ -2,6 +2,7 @@ const { sqs } = require('./');
 
 const queueUrl = process.env.AWS_URL;
 
+
 // add permissions for queue on AWS SQS
 const addPermissionsForQueue = (params) => {
   const addPermissions = sqs.addPermissionAsync(params).promise();
@@ -27,7 +28,7 @@ const getMessages = (params) => {
 const sendMessage = (message) => {
   const sendData = sqs.sendMessage(message).promise();
   return sendData.then(data => data)
-    // .catch(err => console.error('error sending messages to queue', err));
+    .catch(err => console.error('error sending messages to queue', err));
 };
 
 // get messages from a queue
@@ -37,11 +38,18 @@ const deleteMessage = (params) => {
     .catch(err => console.error('error deleting message from queue', err));
 };
 
+const processMessages = (message, done) => {
+  console.log('message received', message);
+  done();
+}
+
+
 module.exports = {
   addPermissionsForQueue,
   createQueue,
   getMessages,
   sendMessage,
-  deleteMessage
+  deleteMessage,
+  processMessages
 };
 

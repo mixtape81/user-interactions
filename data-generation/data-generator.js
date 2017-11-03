@@ -10,7 +10,7 @@ let catchUpTillDate;
 let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
 let addTime;
 let lastEntry;
-let lastTimeStamp = 1509661839005; /* helpers.startInMilliseconds;*/
+let lastTimeStamp = helpers.startInMilliseconds; //1509661839005; //Nov 2 /* ;*/
 let lastTimeStampPerRound;
 let round = 1;
 let logId = 1;
@@ -165,10 +165,11 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
 
   sessionsToTrigger.forEach((session) => {
     const event = helpers.eventProbabilites(helpers.generateRandomEvent());
+    console.log('event is', event);
     events[event](helpers.parseSession(session));
   });
 
-  return addToAWS ? queries.updateAWS() : null
+  return addToAWS ? queries.updateAWS() : null;
 };
 
 // this function writes current sessions to sessions.txt
@@ -299,8 +300,6 @@ const checkTimeForNow = (time) => {
     getSessions();
   }
 };
-
-const 
 
 // function to start script
 const addMockData = () => {

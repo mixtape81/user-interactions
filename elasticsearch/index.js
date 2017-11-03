@@ -5,13 +5,13 @@ const client = new elasticsearch.Client({
   log: 'info'
 });
 
-client.ping({ requestTimeout: 30000 }, (err) => {
-  if (err) {
-    console.error('elasticsearch cluster is down!', err);
-  } else {
-    console.log('All is well');
-  }
-});
+// client.ping({ requestTimeout: 30000 }, (err) => {
+//   if (err) {
+//     console.error('elasticsearch cluster is down!', err);
+//   } else {
+//     console.log('All is well');
+//   }
+// });
 
 module.exports = {
   client

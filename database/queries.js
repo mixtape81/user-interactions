@@ -6,7 +6,7 @@ const queriesForAnalysis = {
   getSongReactions: '',
   getSearches: '',
   getLogs: ''
-}
+};
 
 // insert bulk data
 const queryDB = query => db.query(query).catch(err => console.log('error statement in queries', err));
