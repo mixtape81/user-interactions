@@ -165,7 +165,6 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
 
   sessionsToTrigger.forEach((session) => {
     const event = helpers.eventProbabilites(helpers.generateRandomEvent());
-    console.log('event is', event);
     events[event](helpers.parseSession(session));
   });
 

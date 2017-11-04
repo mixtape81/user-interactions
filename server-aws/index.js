@@ -1,6 +1,7 @@
 require('../environment.js');
 const AWS = require('aws-sdk');
-// const Consumer   require('./aws-queries.js');
+const Consumer = require('./aws-queries.js');
+const queries = require('./queries.js');
 AWS.config.setPromisesDependency(require('bluebird'));
 
 const config = {
@@ -19,20 +20,18 @@ const checkConnectionByFetchingQueues = (params) => {
 };
 checkConnectionByFetchingQueues({});
 
-// const app = Consumer.create({
-//   queueUrl: process.env.AWS_URL,
-//   waitTimeSeconds: 15,
+const app = Consumer.create({
+  queueUrl: process.env.AWS_URL,
+  handleMessage: queries.processMessages
+  // add message to database based on attributes
+  // or send to elastic search
+});
 
-//   handleMessage: queries.processMessages
-//   // add message to database based on attributes
-//   // or send to elastic search
-// });
+app.on('error', (err) => {
+  console.error(err.message);
+});
 
-// app.on('error', (err) => {
-//   console.error(err.message);
-// });
-
-// app.start();
+app.start();
 
 module.exports = {
   sqs,

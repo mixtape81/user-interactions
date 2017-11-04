@@ -3,7 +3,7 @@ const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index.js');
 const db = require('../database/queries.js');
 const { addDocumentsInBulk } = require('../elasticsearch/queries');
-const SQS = require('../server-aws/aws-queries.js');
+// const SQS = require('../server-aws/aws-queries.js');
 
 
 // ******************************** HELPERS FUNCTIONS ************************************ //

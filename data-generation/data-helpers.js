@@ -130,7 +130,6 @@ const averageSessionsPerDay = (timeStamp) => {
 };
 
 const eventProbabilites = (n) => {
-  console.log('n', n);
   if (n >= 1 && n <= 5) {
     return 'skip';
   } else if (n >= 6 && n <= 15) {

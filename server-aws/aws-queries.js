@@ -1,7 +1,6 @@
 const { sqs } = require('./');
 
-const queueUrl = process.env.AWS_URL;
-
+// const queueUrl = process.env.AWS_URL;
 
 // add permissions for queue on AWS SQS
 const addPermissionsForQueue = (params) => {
@@ -40,7 +39,7 @@ const deleteMessage = (params) => {
 
 const processMessages = (message, done) => {
   console.log('message received', message);
-  done();
+  // done();
 }
 
 
