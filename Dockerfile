@@ -1,5 +1,5 @@
 #Official parent image
-FROM node:boron
+FROM node
 
 #Create app directory
 WORKDIR /app
@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 8080
 
 # Command to run when the image launches
-CMD [ "npm", "aws-server" ]
+CMD [ "npm", "start" ]
