@@ -5,7 +5,7 @@ FROM node
 WORKDIR /app
 
 # Install app dependencies
-COPY package.json .
+COPY package.json . package-lock.json ./
 
 RUN npm install
 # If you are building your code for production
@@ -14,8 +14,8 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-# Expose 8080 to make avaiable to outside world
-EXPOSE 8080
+# Expose 80 to make avaiable to outside world
+EXPOSE 3000
 
 # Command to run when the image launches
 CMD [ "npm", "start" ]
