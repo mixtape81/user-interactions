@@ -4,7 +4,7 @@
   "description": "service to store interactions a user has with mix tape",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server/index.js",
+    "start": "NODE_ENV=production nodemon server/index.js",
     "server-dev-test": "NODE_ENV=test nodemon server/index.js",
     "aws-server": "node server-aws/index.js",
     "test": "NODE_ENV=travis mocha tests/specs.js --exit",

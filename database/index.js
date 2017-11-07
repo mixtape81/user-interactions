@@ -12,6 +12,9 @@ const config = {
   logging: false
 };
 
+
+console.log('debug', config);
+
 const db = new Sequelize(config);
 
 db.authenticate()
