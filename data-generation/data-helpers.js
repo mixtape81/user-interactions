@@ -1,6 +1,8 @@
 // **** startDate **** new Date('2017-08-01T10:00:06.420Z').toISOString() ***** 10 am UTC**** //
 
-const startInMilliseconds = 1501581638000; // 10 am UTC in milliseconds
+const startInMilliseconds = 1493632800000; // 10 am UTC in milliseconds
+const timeToday = 1509661839005; // Nov 2  3:30 pm PDT
+
 
 const genres = [
   'Rock and Roll',
@@ -28,19 +30,21 @@ const playlists = {
   10: [19, 20]
 };
 
-
 const dayEstimates = {
-  1: 100, // 100000
-  2: 84, // 45980 // 90000
-  3: 110, // 53856 // 105000  // 71248
-  4: 124, // 64245 // 110000
-  5: 144, // 70763 // 150000
-  6: 180, // 74842 // 180000
-  0: 130 // 120000
+  1: 180, // 100000
+  2: 170, // 45980 // 90000
+  3: 200, // 53856 // 105000  // 71248
+  4: 248, // 64245 // 110000
+  5: 290, // 70763 // 150000
+  6: 360, // 74842 // 180000
+  0: 160 // 120000
 };
 
 // random addtional count for sessions
-const generateCountForSessions = () => Math.floor(Math.random() * 5) + 1;
+const generateCountForSessions = () => Math.ceil(Math.random() * 5);
+
+// generate random number between 1 - 5
+const generateOneToThree = () => Math.ceil(Math.random() * 3);
 
 // random index between 0 & 1
 const generateRandomIndex = () => Math.floor(Math.random() * 2);
@@ -91,11 +95,11 @@ const averageSessionsPerDay = (timeStamp) => {
   let sessions = dayEstimates[day];
   if ((hour >= 1 && hour <= 7) || hour === 23 || hour === 0) {
     if (hour === 23 && minutes <= 20 && minutes >= 0) {
-      sessions = 3;
+      sessions = 3 * generateCountForSessions();
     } else if (hour === 23 && minutes >= 21 && minutes <= 40) {
-      sessions = 2;
+      sessions = 2 * generateCountForSessions();
     } else if (hour === 23 && minutes >= 40 && minutes <= 59) {
-      sessions = 1;
+      sessions = 1 * generateCountForSessions();
     } else if (hour === 7) {
       if (minutes >= 0 && minutes <= 20) {
         sessions = Math.floor(dayEstimates[day] / 2);
@@ -105,12 +109,12 @@ const averageSessionsPerDay = (timeStamp) => {
         sessions = dayEstimates[day] * 2;
       }
     } else {
-      sessions = Math.floor(Math.random() * 10);
+      sessions = Math.floor(Math.random() * 30);
     }
   } else if (hour >= 8 && hour <= 11) {
     sessions = dayEstimates[day] * generateCountForSessions();
   } else if (hour >= 12 && hour <= 16) {
-    sessions = Math.floor(dayEstimates[day] / generateCountForSessions());
+    sessions = Math.floor(dayEstimates[day] / generateOneToThree());
   } else if (hour >= 17 && hour <= 20) {
     sessions = Math.ceil(dayEstimates[day] * 2);
   } else if (hour >= 21 && hour < 23) {
@@ -119,7 +123,7 @@ const averageSessionsPerDay = (timeStamp) => {
   sessions = sessions < 0 ? 1 : sessions;
   const variation = generateRandomIndex();
   const random = generateCountForSessions();
-  const value = variation ? Math.floor(previous + (random * 1.5)) : (previous - random);
+  const value = variation ? Math.floor(previous + (random * 2)) : (previous - random);
   dayEstimates[day] = value < 1 ? value * -1 : value;
   console.log('number of sessions to generate', sessions);
   return sessions;
@@ -141,11 +145,11 @@ const eventProbabilites = (n) => {
 };
 
 const playlistProbabilities = (n) => {
-  // implement probability for playlists
+  // TODO: implement probability for playlists
 };
 
 const genreProbabilities = (n) => {
-  // implement genre probablity
+  // TODO: implement genre probablity
 };
 
 const parseDate = (date) => {

@@ -2,23 +2,25 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index');
 const helpers = require('./data-helpers.js');
-const { updateDatabase } = require('./database-query');
-const { feedElasticsearch } = require('./database-query');
+const queries = require('./data-queries.js');
 
 let usersWithSessions;
 let catchUpTillDate;
+// let runEveryHour;
 let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
 let addTime;
 let lastEntry;
-let lastTimeStamp = helpers.startInMilliseconds;
+let lastTimeStamp = helpers.startInMilliseconds; //1509661839005; //Nov 2 /* ;*/
 let lastTimeStampPerRound;
 let round = 1;
 let logId = 1;
 let count = 0;
+let addToDB = true;
+let addToAWS = false;
 
 // check entries count to update database
 const checkEntriesCount = () => {
-  if (count > 5000) {
+  if (count > 100000) {
     count = 1;
     return true;
   }
@@ -55,9 +57,10 @@ const updateFiles = (jsonFile, sqlFile, json, sql, event) => {
   return updateUserSessions()
     .then(() => fs.appendFileAsync(jsonFile, json))
     .then(() => fs.appendFileAsync(sqlFile, sql))
-    .then(() => (checkEntriesCount() ? updateDatabase() : null))
+    .then(() => (checkEntriesCount() && addToDB ? queries.updateDatabase() : null))
     .catch(err => console.log(`error updating database in ${event}`, err));
 };
+
 
 // this function triggers a playlist view
 const triggerPlaylistView = (session) => {
@@ -164,11 +167,13 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
     const event = helpers.eventProbabilites(helpers.generateRandomEvent());
     events[event](helpers.parseSession(session));
   });
+
+  return addToAWS ? queries.updateAWS() : null;
 };
 
 // this function writes current sessions to sessions.txt
 const archiveSessions = (active) => {
-  fs.truncateAsync(files.sessions)
+  return fs.truncateAsync(files.sessions)
     .then(() => fs.writeFileAsync(files.sessions, active))
     .then(() => triggerEventsOnSessions(active))
     .catch(err => console.log('error archiving sessions', err));
@@ -232,7 +237,7 @@ const generateAndProcessSessions = (active) => {
   }
   lastEntry = getLastTimeStampAndSessionId(current);
   const newSessions = generateRandomSessions(lastEntry);
-  archiveSessions(active.concat(newSessions));
+  return archiveSessions(active.concat(newSessions))
 };
 
 // this function finds all the active sessions, and then passes them to triggerEvents.
@@ -276,9 +281,15 @@ const getSessions = () => {
 const checkTimeForNow = (time) => {
   if (time > Date.now()) {
     clearInterval(catchUpTillDate);
-    updateDatabase()
-      .then(() => feedElasticsearch())
-      .then(() => process.exit())
+    queries.updateDatabase()
+      .then(() => {
+        console.log('last time stamp when time is current is', lastTimeStamp);
+        process.exit();
+        // runEveryHour = setInterval(() => {
+        //   checkTimeForNow(lastTimeStamp)
+        // }, 3600000);
+
+      })
       .catch(err => console.log('error while ending script run', err));
   } else {
     console.log(`round number - ${round}`);

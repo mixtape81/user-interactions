@@ -4,12 +4,16 @@ const Sequelize = require('sequelize');
 // console.log('environment in db', env.ENV_PATH);
 
 const config = {
+  host: process.env.DB_HOSTNAME,
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   dialect: 'postgres',
   logging: false
 };
+
+
+console.log('debug', config);
 
 const db = new Sequelize(config);
 
