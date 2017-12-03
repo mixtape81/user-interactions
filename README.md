@@ -31,13 +31,13 @@ npm install
 
 ## Requirements
 
-"aws-sdk": "^2.141.0"
-"bluebird": "^3.5.1"
-"body-parser": "^1.18.2"
-"dotenv": "^4.0.0"
-"elasticsearch": "^13.3.1"
-"express": "^4.16.2"
-"pg": "^7.3.0"
-"sequelize": "^4.17.2"
-"sqs-consumer": "^3.8.0"
-"winston": "^2.4.0"
+- aws-sdk 2.141.0
+- bluebird 3.5.1
+- body-parser 1.18.2
+- dotenv 4.0.0
+- elasticsearch 13.3.1
+- express 4.16.2 
+- pg 7.3.0
+- sequelize 4.17.2
+- sqs-consumer 3.8.0
+- winston 2.4.0 
