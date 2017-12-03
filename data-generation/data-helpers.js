@@ -30,18 +30,28 @@ const playlists = {
   10: [19, 20]
 };
 
+// const dayEstimates = {
+//   1: 180, // 100000
+//   2: 170, // 45980 // 90000
+//   3: 200, // 53856 // 105000  // 71248
+//   4: 248, // 64245 // 110000
+//   5: 290, // 70763 // 150000
+//   6: 360, // 74842 // 180000
+//   0: 160 // 120000
+// };
+
 const dayEstimates = {
-  1: 180, // 100000
-  2: 170, // 45980 // 90000
-  3: 200, // 53856 // 105000  // 71248
-  4: 248, // 64245 // 110000
-  5: 290, // 70763 // 150000
-  6: 360, // 74842 // 180000
-  0: 160 // 120000
+  1: 1800, // 100000
+  2: 1700, // 45980 // 90000
+  3: 2000, // 53856 // 105000  // 71248
+  4: 2480, // 64245 // 110000
+  5: 2900, // 70763 // 150000
+  6: 3600, // 74842 // 180000
+  0: 1600 // 120000
 };
 
 // random addtional count for sessions
-const generateCountForSessions = () => Math.ceil(Math.random() * 5);
+const generateCountForSessions = () => Math.ceil(Math.random() * 3);
 
 // generate random number between 1 - 5
 const generateOneToThree = () => Math.ceil(Math.random() * 3);
@@ -106,14 +116,14 @@ const averageSessionsPerDay = (timeStamp) => {
       } else if (minutes >= 21 && minutes <= 40) {
         sessions = dayEstimates[day];
       } else if (minutes >= 41 && minutes <= 59) {
-        sessions = dayEstimates[day] * 2;
+        sessions = Math.floor(dayEstimates[day] * 1.5);
       }
     } else {
       sessions = Math.floor(Math.random() * 30);
     }
-  } else if (hour >= 8 && hour <= 11) {
+  } else if (hour >= 8 && hour <= 10) {
     sessions = dayEstimates[day] * generateCountForSessions();
-  } else if (hour >= 12 && hour <= 16) {
+  } else if (hour >= 11 && hour <= 16) {
     sessions = Math.floor(dayEstimates[day] / generateOneToThree());
   } else if (hour >= 17 && hour <= 20) {
     sessions = Math.ceil(dayEstimates[day] * 2);
@@ -123,7 +133,7 @@ const averageSessionsPerDay = (timeStamp) => {
   sessions = sessions < 0 ? 1 : sessions;
   const variation = generateRandomIndex();
   const random = generateCountForSessions();
-  const value = variation ? Math.floor(previous + (random * 2)) : (previous - random);
+  const value = variation ? (previous + random) : (previous - random);
   dayEstimates[day] = value < 1 ? value * -1 : value;
   console.log('number of sessions to generate', sessions);
   return sessions;
@@ -142,14 +152,6 @@ const eventProbabilites = (n) => {
     return 'songReaction';
   }
   return null;
-};
-
-const playlistProbabilities = (n) => {
-  // TODO: implement probability for playlists
-};
-
-const genreProbabilities = (n) => {
-  // TODO: implement genre probablity
 };
 
 const parseDate = (date) => {

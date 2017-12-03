@@ -48,3 +48,7 @@ data-generation/text/
 
 # Amazon config
 awsconfig.json
+
+# Database dump
+mixtape.dump
+mixtapedb.pgsql

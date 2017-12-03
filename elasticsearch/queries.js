@@ -5,3 +5,4 @@ const addDocumentsInBulk = (index, type, body) => client.bulk({ index, type, bod
 module.exports = {
   addDocumentsInBulk
 };
+
