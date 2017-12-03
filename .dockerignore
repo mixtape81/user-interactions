@@ -1,0 +1,7 @@
+node_modules
+npm-debug.log
+
+data-generation/jsons/
+data-generation/sql-files/
+
+.env.test
