@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 require('../environment.js');
 const dummydata = require('../database/drop-tables.js');
-const helpers = require('../helpers/helpers.js');
+const AWS = require('../server-aws/aws-queries.js');
 
 const app = express();
 const port = process.env.PORT;
@@ -26,34 +26,47 @@ app.get('/', (req, res) => {
 
 // this request gets all playlist views for a given date
 app.get('/playlistviews', (req, res) => {
-  queries.getPlaylistViews(req.query.date)
+  // req.query.date
+  const query = `SELECT playlist_id, genre_id, "createdAt" FROM playlist_views where playlist_views."createdAt" between ${req.query.start} and ${req.query.end}`;
+  // 1507420800000
+  // 1507507200000
+  // const message = {
+  //   MessageBody: JSON.stringify(result),
+  //   QueueUrl: url,
+  //   MessageAttributes: {
+  //     Event: {
+  //       DataType: 'String',
+  //       StringValue: 'playlist views'
+  //     }
+  //   }
+  // };
+  // return AWS.sendMessage(message);
+  queries.queryDB(query)
     .then(result => res.send(result))
-    .catch(err => res.status(400).send(err));
+    .catch(err => res.status(400).send(err))
 });
 
 // this request to get songs heard/skipped from database for a given date
 app.get('/songresponses', (req, res) => {
-  queries.getSongResponses(req.query.date)
-    .then((result) => {
-      if (!result.length) {
-        res.send(result);
-      } else {
-        res.send(helpers.organizeSongsByPlaylist(result));
-      }
-    })
+  const query = `SELECT * FROM song_responses where song_responses.date='${req.query.date}'`;
+  queries.queryDB(query)
+    .then(result => res.send(result))
     .catch(err => res.status(400).send(err));
+  // const body = {
+  //   query: {
+  //     size: 10000,
+  //     term: {
+  //       date: req.query.date
+  //     }
+  //   }
+  // };   
 });
 
-// this request to get songs liked/disliked from database for a given date
+// // this request to get songs liked/disliked from database for a given date
 app.get('/songreactions', (req, res) => {
-  queries.getSongReactions(req.query.date)
-    .then((result) => {
-      if (!result.length) {
-        res.send(result);
-      } else {
-        res.send(helpers.organizeSongsByPlaylist(result));
-      }
-    })
+  const query = `SELECT * FROM song_responses where song_responses.date='${req.query.date}'`;
+  queries.queryDB(query)
+    .then(result => res.send(result))
     .catch(err => res.status(400).send(err));
 });
 
@@ -121,9 +134,7 @@ app.post('/dummydata', (req, res) => {
   dummydata.dropTables()
     .then(() => dummydata.addEvents())
     .then(() => dummydata.testRun())
-    .then((result) => {
-      res.send('DONE');
-    })
+    .then(() => res.send('DONE'))
     .catch((err) => {
       res.status(400).send(err);
     });

@@ -5,13 +5,17 @@ const helpers = require('./data-helpers.js');
 const queries = require('./data-queries.js');
 
 let usersWithSessions;
+let limit = 100000;
 let catchUpTillDate;
-// let runEveryHour;
+let runEveryHour;
 let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
+// lastSession = '3495379--7060--1509762542858--1509769262858';
 let addTime;
 let lastEntry;
 let lastTimeStamp = helpers.startInMilliseconds; //1509661839005; //Nov 2 /* ;*/
+// lastTimeStamp = 1509769262858;
 let lastTimeStampPerRound;
+// lastTimeStampPerRound = 1509769262858;
 let round = 1;
 let logId = 1;
 let count = 0;
@@ -20,7 +24,7 @@ let addToAWS = false;
 
 // check entries count to update database
 const checkEntriesCount = () => {
-  if (count > 100000) {
+  if (count > limit) {
     count = 1;
     return true;
   }
@@ -163,11 +167,31 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
     songResponse: triggerSongResponse
   };
 
-  sessionsToTrigger.forEach((session) => {
+  sessions.forEach((session) => {
     const event = helpers.eventProbabilites(helpers.generateRandomEvent());
     events[event](helpers.parseSession(session));
   });
+};
 
+  let total = sessionsToTrigger.length;
+  if (total / 5000 > 1) {
+    let eventPromise = new Promise((resolve, reject) => {
+      let start = 0;
+    })
+      triggerEvents(sessionsToTrigger.slice(start, incrementBy));
+    let incrementBy = 5000;
+    while (total > 0) {
+      console.log('TOTAL IN ARCHIEVE', total);
+      total -= 5000;
+      start += 5000;
+      incrementBy += 5000;
+      if (incrementBy >= sessionsToTrigger.length) {
+        incrementBy = sessionsToTrigger.length + 1;
+      }
+    }
+  } else {
+    triggerEvents(sessionsToTrigger);
+  }
   return addToAWS ? queries.updateAWS() : null;
 };
 
@@ -176,8 +200,14 @@ const archiveSessions = (active) => {
   return fs.truncateAsync(files.sessions)
     .then(() => fs.writeFileAsync(files.sessions, active))
     .then(() => triggerEventsOnSessions(active))
+    .then(() => {
+      // setTimeout(() => {
+        checkTimeForNow(lastTimeStamp);
+      // }, 200);
+    })
     .catch(err => console.log('error archiving sessions', err));
 };
+
 
 // this function generates a random end time for each session based on
 // start time (limit: 120 mins)
@@ -280,15 +310,11 @@ const getSessions = () => {
 // function to call at every interval
 const checkTimeForNow = (time) => {
   if (time > Date.now()) {
-    clearInterval(catchUpTillDate);
+    // clearInterval(catchUpTillDate);
     queries.updateDatabase()
       .then(() => {
         console.log('last time stamp when time is current is', lastTimeStamp);
-        process.exit();
-        // runEveryHour = setInterval(() => {
-        //   checkTimeForNow(lastTimeStamp)
-        // }, 3600000);
-
+        limit = 1000;
       })
       .catch(err => console.log('error while ending script run', err));
   } else {
@@ -302,9 +328,10 @@ const checkTimeForNow = (time) => {
 
 // function to start script
 const addMockData = () => {
-  catchUpTillDate = setInterval(() => {
-    checkTimeForNow(lastTimeStamp);
-  }, 250);
+  checkTimeForNow(lastTimeStamp);
+  // catchUpTillDate = setInterval(() => {
+  //   checkTimeForNow(lastTimeStamp);
+  // }, 250);
 };
 
 addMockData();
