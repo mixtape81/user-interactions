@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 require('../environment.js');
 const dummydata = require('../database/drop-tables.js');
-const AWS = require('../server-aws/aws-queries.js');
+// const AWS = require('../server-aws/aws-queries.js');
 
 const app = express();
 const port = process.env.PORT;
@@ -71,19 +71,20 @@ app.get('/songreactions', (req, res) => {
 });
 
 // this request adds a playlist view to the database
-app.post('/view', (req, res) => {
+app.post('/playlistview', (req, res) => {
   // req.body.date = new Date();
-  queries.addToLogs(req.body)
-    .then((result) => {
-      req.body.logId = result.id;
-      return queries.addToPlaylistView(req.body);
-    })
-    .then((result) => {
-      res.send(result.dataValues);
-    })
-    .catch((err) => {
-      res.status(400).send(err);
-    });
+  console.log('request', req.body);
+  // queries.addToLogs(req.body)
+  //   .then((result) => {
+  //     req.body.logId = result.id;
+  //     return queries.addToPlaylistView(req.body);
+  //   })
+  //   .then((result) => {
+  //     res.send(result.dataValues);
+  //   })
+  //   .catch((err) => {
+  //     res.status(400).send(err);
+  //   });
 });
 
 // this request adds a genre searched to the database
@@ -133,7 +134,7 @@ app.post('/songresponse', (req, res) => {
 app.post('/dummydata', (req, res) => {
   dummydata.dropTables()
     .then(() => dummydata.addEvents())
-    .then(() => dummydata.testRun())
+    // .then(() => dummydata.testRun())
     .then(() => res.send('DONE'))
     .catch((err) => {
       res.status(400).send(err);

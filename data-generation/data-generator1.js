@@ -1,18 +1,22 @@
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
-// const files = require('./files-index');
+const files = require('./files-index');
 const helpers = require('./data-helpers1.js');
 const queries = require('./data-queries.js');
 
 let usersWithSessions;
-// let limit = 100000;
+let limit = 100000;
 let catchUpTillDate;
 let runEveryHour;
-let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
+let date = Date.now();
+let lastTimeStamp = date;
+let lastSession = `0--null--${date}--${date + (58 * 60000)}`;
+// let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
 // lastSession = '3495379--7060--1509762542858--1509769262858';
 let addTime;
 let lastEntry;
-let lastTimeStamp = helpers.startInMilliseconds; //1509661839005; //Nov 2 /* ;*/
+// let lastTimeStamp = helpers.startInMilliseconds; //1509661839005; //Nov 2 /* ;*/
+
 // lastTimeStamp = 1509769262858;
 let lastTimeStampPerRound;
 // lastTimeStampPerRound = 1509769262858;
@@ -77,14 +81,16 @@ const triggerPlaylistView = (session) => {
     createdAt: date.createdAt,
     logId
   };
-  const json = `${files.index}\n${JSON.stringify(view)}\n`;
-  const sql = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
-  const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 1, ${Number(session[0])}),\n`;
-  const logJSON = generateLog(date, session, 1);
+  // const json = `${files.index}\n${JSON.stringify(view)}\n`;
+  // const sql = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
+  // const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 1, ${Number(session[0])}),\n`;
+  // const logJSON = generateLog(date, session, 1);
   logId += 1;
 
-  return updateLogs(logJSON, logSQL)
-    .then(() => updateFiles(files.playlistViewsJSON, files.playlistViews, json, sql, 'playlistviews'));
+  queries.sendToServer('playlistview', view);
+
+  // return updateLogs(logJSON, logSQL)
+  //   .then(() => updateFiles(files.playlistViewsJSON, files.playlistViews, json, sql, 'playlistviews'));
 };
 
 // this function triggers a genre searched
@@ -167,33 +173,33 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
     songResponse: triggerSongResponse
   };
 
-  sessions.forEach((session) => {
+  sessionsToTrigger.forEach((session) => {
     const event = helpers.eventProbabilites(helpers.generateRandomEvent());
     events[event](helpers.parseSession(session));
   });
 };
 
-  let total = sessionsToTrigger.length;
-  if (total / 5000 > 1) {
-    let eventPromise = new Promise((resolve, reject) => {
-      let start = 0;
-    })
-      triggerEvents(sessionsToTrigger.slice(start, incrementBy));
-    let incrementBy = 5000;
-    while (total > 0) {
-      console.log('TOTAL IN ARCHIEVE', total);
-      total -= 5000;
-      start += 5000;
-      incrementBy += 5000;
-      if (incrementBy >= sessionsToTrigger.length) {
-        incrementBy = sessionsToTrigger.length + 1;
-      }
-    }
-  } else {
-    triggerEvents(sessionsToTrigger);
-  }
-  return addToAWS ? queries.updateAWS() : null;
-};
+//   let total = sessionsToTrigger.length;
+//   if (total / 5000 > 1) {
+//     let eventPromise = new Promise((resolve, reject) => {
+//       let start = 0;
+//     })
+//       triggerEvents(sessionsToTrigger.slice(start, incrementBy));
+//     let incrementBy = 5000;
+//     while (total > 0) {
+//       console.log('TOTAL IN ARCHIEVE', total);
+//       total -= 5000;
+//       start += 5000;
+//       incrementBy += 5000;
+//       if (incrementBy >= sessionsToTrigger.length) {
+//         incrementBy = sessionsToTrigger.length + 1;
+//       }
+//     }
+//   } else {
+//     triggerEvents(sessionsToTrigger);
+//   }
+//   return addToAWS ? queries.updateAWS() : null;
+// };
 
 // this function writes current sessions to sessions.txt
 const archiveSessions = (active) => {
@@ -202,8 +208,8 @@ const archiveSessions = (active) => {
     .then(() => triggerEventsOnSessions(active))
     .then(() => {
       // setTimeout(() => {
-        // checkTimeForNow(lastTimeStamp);
-        runScript();
+      // checkTimeForNow(lastTimeStamp);
+      runScript();
       // }, 200);
     })
     .catch(err => console.log('error archiving sessions', err));
