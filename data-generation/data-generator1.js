@@ -79,7 +79,9 @@ const triggerPlaylistView = (session) => {
     genre_id: list.genre,
     date: date.date,
     createdAt: date.createdAt,
-    logId
+    session_id: Number(session[0]),
+    user_id: Number(session[1]),
+    event_id: 1
   };
   // const json = `${files.index}\n${JSON.stringify(view)}\n`;
   // const sql = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;

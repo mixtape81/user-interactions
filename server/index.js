@@ -75,19 +75,18 @@ app.get('/songreactions', (req, res) => {
 // this request adds a playlist view to the database
 app.post('/playlistview', (req, res) => {
   // req.body.date = new Date();
+  const {user_id, date, session_id, createdAt, event_id, playlist_id, genre_id} = req.body;
+
   const insertQueries = {
     logs: 'INSERT INTO logs (user_id, date, "createdAt", "eventTypeId", "sessionId") VALUES',
     views: 'INSERT INTO playlist_views (playlist_id, genre_id, date, "createdAt", "logId") VALUES',
   }
 
-  console.log('request received', req.body);
-  queries.dbQuery(req.body)
+  queries.queryDB(`${insertQueries.logs} (${user_id}, '${date}', ${createdAt}, ${event_id}, ${session_id})`)
+    .then(() => queries.queryDB(`SELECT id from logs WHERE logs."createdAt" = ${createdAt} AND logs.user_id = ${user_id}`))
     .then((result) => {
-      req.body.logId = result.id;
-      return queries.addToPlaylistView(req.body);
-    })
-    .then((result) => {
-      res.send(result.dataValues);
+      const values = `(${playlist_id}, ${genre_id}, '${date}', ${createdAt}, ${result[0][0].id})`;
+      return queries.queryDB(`${insertQueries.views} ${values}`);
     })
     .catch((err) => {
       res.status(400).send(err);
