@@ -4,6 +4,8 @@ require('../environment.js');
 const dummydata = require('../database/drop-tables.js');
 // const AWS = require('../server-aws/aws-queries.js');
 
+
+
 const app = express();
 const port = process.env.PORT;
 const queries = require('../database/queries.js');
@@ -12,12 +14,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // add a date for all post requests
-app.use((req, res, next) => {
-  if (req.method === 'POST') {
-    req.body.date = req.body.date ? req.body.date : new Date().toISOString().match(/\d+-\d+-\d+/);
-  }
-  next();
-});
+// app.use((req, res, next) => {
+//   if (req.method === 'POST') {
+//     req.body.date = req.body.date ? req.body.date : new Date().toISOString().match(/\d+-\d+-\d+/);
+//   }
+//   next();
+// });
 
 // basic hello word get request
 app.get('/', (req, res) => {
@@ -73,18 +75,23 @@ app.get('/songreactions', (req, res) => {
 // this request adds a playlist view to the database
 app.post('/playlistview', (req, res) => {
   // req.body.date = new Date();
-  console.log('request', req.body);
-  // queries.addToLogs(req.body)
-  //   .then((result) => {
-  //     req.body.logId = result.id;
-  //     return queries.addToPlaylistView(req.body);
-  //   })
-  //   .then((result) => {
-  //     res.send(result.dataValues);
-  //   })
-  //   .catch((err) => {
-  //     res.status(400).send(err);
-  //   });
+  const insertQueries = {
+    logs: 'INSERT INTO logs (user_id, date, "createdAt", "eventTypeId", "sessionId") VALUES',
+    views: 'INSERT INTO playlist_views (playlist_id, genre_id, date, "createdAt", "logId") VALUES',
+  }
+
+  console.log('request received', req.body);
+  queries.dbQuery(req.body)
+    .then((result) => {
+      req.body.logId = result.id;
+      return queries.addToPlaylistView(req.body);
+    })
+    .then((result) => {
+      res.send(result.dataValues);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 });
 
 // this request adds a genre searched to the database
@@ -143,6 +150,7 @@ app.post('/dummydata', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
+  console.log('Time', new Date());
 });
 
 module.exports = {

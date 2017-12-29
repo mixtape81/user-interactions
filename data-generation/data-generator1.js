@@ -57,7 +57,7 @@ const updateLogs = (json, sql) => (
 const updateUserSessions = () => {
   const users = [];
   usersWithSessions.forEach(user => users.push(user));
-  return fs.writeFileAsync(files.users, users);
+  return fs.writeFileAsync(files.currentUsers, users);
 };
 
 // this function updates the files with the event info 
@@ -175,7 +175,8 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
 
   sessionsToTrigger.forEach((session) => {
     const event = helpers.eventProbabilites(helpers.generateRandomEvent());
-    events[event](helpers.parseSession(session));
+    // events[event](helpers.parseSession(session));
+    events.playlistView(helpers.parseSession(session));
   });
 };
 
@@ -203,14 +204,13 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
 
 // this function writes current sessions to sessions.txt
 const archiveSessions = (active) => {
-  return fs.truncateAsync(files.sessions)
-    .then(() => fs.writeFileAsync(files.sessions, active))
+  return fs.truncateAsync(files.currentSessions)
+    .then(() => fs.writeFileAsync(files.currentSessions, active))
     .then(() => triggerEventsOnSessions(active))
     .then(() => {
-      // setTimeout(() => {
-      // checkTimeForNow(lastTimeStamp);
+      setTimeout(() => {
       runScript();
-      // }, 200);
+      }, 500);
     })
     .catch(err => console.log('error archiving sessions', err));
 };
@@ -307,9 +307,9 @@ const getUsers = (values) => {
 
 // get existing sessions before running script again
 const getSessions = () => {
-  fs.readFileAsync(files.users)
+  fs.readFileAsync(files.currentUsers)
     .then(users => getUsers(users ? users.toString() : null))
-    .then(() => fs.readFileAsync(files.sessions))
+    .then(() => fs.readFileAsync(files.currentSessions))
     .then(sessions => findActiveSessions(sessions ? sessions.toString() : null))
     .catch(err => console.log('error reading sessions file', err));
 };

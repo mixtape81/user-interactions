@@ -124,16 +124,19 @@ const updateAWS = () => (
 // ********** SERVER REQUESTS ************* //
 
 const sendToServer = (type, event) => {
-  const url = `http://${process.env.DB_HOSTNAME}/${type}`;
+  const url = `http://${process.env.DB_HOSTNAME}:${process.env.PORT}/${type}`;
   if (type === 'playlistview') {
-    console.log('here with view', event);
     request.post({
       url,
       body: event,
-      'Content-Type': 'application/json'
+      json: true
     },
     (err, response, body) => {
-      console.log('response body received', body);
+      if (err) {
+        console.log('err making request', err);
+      } else {
+        console.log('response body received', body);
+      }
     });
   }
 }
@@ -144,5 +147,3 @@ module.exports = {
   updateAWS,
   sendToServer
 };
-
-
