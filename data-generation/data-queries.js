@@ -3,6 +3,7 @@ const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index.js');
 const db = require('../database/queries.js');
 const { addDocumentsInBulk } = require('../elasticsearch/queries');
+const request = require('request');gi
 // const SQS = require('../server-aws/aws-queries.js');
 
 
@@ -122,4 +123,10 @@ module.exports = {
   updateDatabase,
   updateAWS
 };
+
+// ********** SERVER REQUESTS ************* //
+
+const sendToServer = () => {
+
+}
 
