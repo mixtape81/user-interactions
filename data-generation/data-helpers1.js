@@ -119,7 +119,7 @@ const averageSessionsPerDay = (timeStamp) => {
         sessions = Math.floor(dayEstimates[day] * 1.5);
       }
     } else {
-      sessions = Math.floor(Math.random() * 30);
+      sessions = Math.floor(Math.random() * 10);
     }
   } else if (hour >= 8 && hour <= 10) {
     sessions = dayEstimates[day] * generateCountForSessions();

@@ -5,7 +5,7 @@ const helpers = require('./data-helpers1.js');
 const queries = require('./data-queries.js');
 
 let usersWithSessions;
-let limit = 100000;
+// let limit = 100000;
 let catchUpTillDate;
 let runEveryHour;
 let date = Date.now();
@@ -20,21 +20,7 @@ let lastEntry;
 // lastTimeStamp = 1509769262858;
 let lastTimeStampPerRound;
 // lastTimeStampPerRound = 1509769262858;
-let round = 1;
-let logId = 1;
-let count = 0;
-let addToDB = true;
-let addToAWS = false;
 
-// check entries count to update database
-const checkEntriesCount = () => {
-  if (count > limit) {
-    count = 1;
-    return true;
-  }
-  count += 1;
-  return false;
-};
 
 // generate log object for elasticsearch
 const generateLog = (date, session, event) => {
@@ -75,24 +61,15 @@ const triggerPlaylistView = (session) => {
   const list = helpers.generateRandomPlaylistInfo();
   const date = helpers.parseDate(Number(session[2]));
   const view = {
-    playlist_id: list.playlist,
-    genre_id: list.genre,
+    playlistId: list.playlist,
+    genreId: list.genre,
     date: date.date,
     createdAt: date.createdAt,
-    session_id: Number(session[0]),
-    user_id: Number(session[1]),
-    event_id: 1
+    sessionId: Number(session[0]),
+    userId: Number(session[1]),
+    eventId: 1
   };
-  // const json = `${files.index}\n${JSON.stringify(view)}\n`;
-  // const sql = `(${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
-  // const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 1, ${Number(session[0])}),\n`;
-  // const logJSON = generateLog(date, session, 1);
-  logId += 1;
-
   queries.sendToServer('playlistview', view);
-
-  // return updateLogs(logJSON, logSQL)
-  //   .then(() => updateFiles(files.playlistViewsJSON, files.playlistViews, json, sql, 'playlistviews'));
 };
 
 // this function triggers a genre searched
@@ -103,16 +80,11 @@ const triggerSearch = (session) => {
     value,
     date: date.date,
     createdAt: date.createdAt,
-    logId
+    sessionId: Number(session[0]),
+    userId: Number(session[1]),
+    eventId: 2
   };
-  const json = `${files.index}\n${JSON.stringify(search)}\n`;
-  const sql = `('${value}','${date.date}', ${date.createdAt}, ${logId}),\n`;
-  const logJSON = generateLog(date, session, 2);
-  const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 2, ${Number(session[0])}),\n`;
-  logId += 1;
-
-  return updateLogs(logJSON, logSQL)
-    .then(() => updateFiles(files.searchesJSON, files.searches, json, sql, 'searches'));
+  queries.sendToServer('search', search);
 };
 
 // this function triggers a song reaction (liked/disliked)
@@ -121,21 +93,16 @@ const triggerSongReaction = (session) => {
   const date = helpers.parseDate(Number(session[2]));
   const songReaction = {
     liked: helpers.generateBoolean(),
-    song_id: helpers.generateRandomSongId(),
-    playlist_id: list.playlist,
-    genre_id: list.playlist,
+    songId: helpers.generateRandomSongId(),
+    playlistId: list.playlist,
+    genreId: list.playlist,
     date: date.date,
     createdAt: date.createdAt,
-    logId
+    sessionId: Number(session[0]),
+    userId: Number(session[1]),
+    eventId: 3
   };
-  const json = `${files.index}\n${JSON.stringify(songReaction)}\n`;
-  const sql = `(${helpers.generateRandomSongId()}, ${helpers.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
-  const logJSON = generateLog(date, session, 3);
-  const logSQL = `(${Number(session[1])},'${date.date}', ${date.createdAt}, 3, ${Number(session[0])}),\n`;
-  logId += 1;
-
-  return updateLogs(logJSON, logSQL)
-    .then(() => updateFiles(files.songReactionsJSON, files.songReactions, json, sql, 'song reactions'));
+  queries.sendToServer('songreaction', songReaction);
 };
 
 // this function triggers a song response (heard/skippeds)
@@ -144,21 +111,16 @@ const triggerSongResponse = (session) => {
   const date = helpers.parseDate(Number(session[2]));
   const songResponse = {
     listenedTo: helpers.generateBoolean(),
-    song_id: helpers.generateRandomSongId(),
-    playlist_id: list.playlist,
-    genre_id: list.playlist,
+    songId: helpers.generateRandomSongId(),
+    playlistId: list.playlist,
+    genreId: list.playlist,
     date: date.date,
     createdAt: date.createdAt,
-    logId
+    sessionId: Number(session[0]),
+    userId: Number(session[1]),
+    eventId: 4
   };
-  const json = `${files.index}\n${JSON.stringify(songResponse)}\n`;
-  const sql = `(${helpers.generateRandomSongId()}, ${helpers.generateBoolean()}, ${list.playlist}, ${list.genre}, '${date.date}', ${date.createdAt}, ${logId}),\n`;
-  const logJSON = generateLog(date, session, 4);
-  const logSQL = `(${Number(session[1])}, '${date.date}', ${date.createdAt}, 4, ${Number(session[0])}),\n`;
-  logId += 1;
-
-  return updateLogs(logJSON, logSQL)
-    .then(() => updateFiles(files.songResponsesJSON, files.songResponses, json, sql, 'song responses'));
+  queries.sendToServer('songresponse', songResponse);
 };
 
 const triggerSkip = () => {
@@ -177,32 +139,10 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
 
   sessionsToTrigger.forEach((session) => {
     const event = helpers.eventProbabilites(helpers.generateRandomEvent());
-    // events[event](helpers.parseSession(session));
-    events.playlistView(helpers.parseSession(session));
+    events[event](helpers.parseSession(session));
+    // events.songResponse(helpers.parseSession(session));
   });
 };
-
-//   let total = sessionsToTrigger.length;
-//   if (total / 5000 > 1) {
-//     let eventPromise = new Promise((resolve, reject) => {
-//       let start = 0;
-//     })
-//       triggerEvents(sessionsToTrigger.slice(start, incrementBy));
-//     let incrementBy = 5000;
-//     while (total > 0) {
-//       console.log('TOTAL IN ARCHIEVE', total);
-//       total -= 5000;
-//       start += 5000;
-//       incrementBy += 5000;
-//       if (incrementBy >= sessionsToTrigger.length) {
-//         incrementBy = sessionsToTrigger.length + 1;
-//       }
-//     }
-//   } else {
-//     triggerEvents(sessionsToTrigger);
-//   }
-//   return addToAWS ? queries.updateAWS() : null;
-// };
 
 // this function writes current sessions to sessions.txt
 const archiveSessions = (active) => {
@@ -212,7 +152,7 @@ const archiveSessions = (active) => {
     .then(() => {
       setTimeout(() => {
       runScript();
-      }, 500);
+      }, 1000);
     })
     .catch(err => console.log('error archiving sessions', err));
 };
@@ -315,32 +255,6 @@ const getSessions = () => {
     .then(sessions => findActiveSessions(sessions ? sessions.toString() : null))
     .catch(err => console.log('error reading sessions file', err));
 };
-
-// // function to call at every interval
-// const checkTimeForNow = (time) => {
-//   if (time > Date.now()) {
-//     // clearInterval(catchUpTillDate);
-//     queries.updateDatabase()
-//       .then(() => {
-//         console.log('last time stamp when time is current is', lastTimeStamp);
-//         limit = 1000;
-//       })
-//       .catch(err => console.log('error while ending script run', err));
-//   } else {
-//     console.log(`round number - ${round}`);
-//     console.log('last time stamp per round', lastTimeStampPerRound ? new Date(lastTimeStampPerRound).toISOString() : undefined);
-//     console.log('count is ', count);
-//     round += 1;
-//     getSessions();
-//   }
-// };
-
-// // function to start script
-// const addMockData = () => {
-//   checkTimeForNow(lastTimeStamp);
-// };
-
-// addMockData();
 
 const runScript = () => {
   getSessions();

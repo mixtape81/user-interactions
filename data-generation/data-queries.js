@@ -124,10 +124,11 @@ const updateAWS = () => (
 // ********** SERVER REQUESTS ************* //
 
 const sendToServer = (type, event) => {
-  const url = `http://${process.env.DB_HOSTNAME}:${process.env.PORT}/${type}`;
-  if (type === 'playlistview') {
-    request.post({
-      url,
+  const endpoint = `http://${process.env.DB_HOSTNAME}:${process.env.PORT}/${type}`;
+  // if (type === 'songresponse') {
+  request.post(
+    {
+      url: endpoint,
       body: event,
       json: true
     },
@@ -137,10 +138,10 @@ const sendToServer = (type, event) => {
       } else {
         console.log('response body received', body);
       }
-    });
-  }
-}
-
+    }
+  );
+  // }
+};
 
 module.exports = {
   updateDatabase,

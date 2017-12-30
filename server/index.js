@@ -2,9 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 require('../environment.js');
 const dummydata = require('../database/drop-tables.js');
+const helpers = require('../helpers/helpers.js');
 // const AWS = require('../server-aws/aws-queries.js');
-
-
 
 const app = express();
 const port = process.env.PORT;
@@ -13,17 +12,64 @@ const queries = require('../database/queries.js');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// add a date for all post requests
-// app.use((req, res, next) => {
-//   if (req.method === 'POST') {
-//     req.body.date = req.body.date ? req.body.date : new Date().toISOString().match(/\d+-\d+-\d+/);
-//   }
-//   next();
-// });
 
 // basic hello word get request
 app.get('/', (req, res) => {
   res.send('Hello, world!');
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  console.log("Unhandled Rejection at: Promise ", p, " reason: ", reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
+
+// this request adds a playlist view to the database
+app.post('/playlistview', (req, res) => {
+  queries.queryDB(`${helpers.insertQueries.logs} ${helpers.parseValues('logs', req.body)}`)
+    .then(() => queries.queryDB(`${helpers.retrieveQueries.logId} logs."createdAt" = ${req.body.createdAt} AND logs.user_id = ${req.body.userId}`))
+    .then((result) => {
+      req.body.logId = helpers.getId(result);
+      return queries.queryDB(`${helpers.insertQueries.views} ${helpers.parseValues('view', req.body)}`)
+    })
+    .then(() => res.send('PlaylistView Added'))
+    .catch(err => res.status(400).send(err));
+});
+
+// this request adds a search event to the database
+app.post('/search', (req, res) => {
+  queries.queryDB(`${helpers.insertQueries.logs} ${helpers.parseValues('logs', req.body)}`)
+    .then(() => queries.queryDB(`${helpers.retrieveQueries.logId} logs."createdAt" = ${req.body.createdAt} AND logs.user_id = ${req.body.userId}`))
+    .then((result) => {
+      req.body.logId = helpers.getId(result);
+      return queries.queryDB(`${helpers.insertQueries.searches} ${helpers.parseValues('search', req.body)}`)
+    })
+    .then(() => res.send('Search Event Added'))
+    .catch(err => res.status(400).send(err));
+});
+
+// this request adds a song reaction to the database
+app.post('/songreaction', (req, res) => {
+  queries.queryDB(`${helpers.insertQueries.logs} ${helpers.parseValues('logs', req.body)}`)
+    .then(() => queries.queryDB(`${helpers.retrieveQueries.logId} logs."createdAt" = ${req.body.createdAt} AND logs.user_id = ${req.body.userId}`))
+    .then((result) => {
+      req.body.logId = helpers.getId(result);
+      return queries.queryDB(`${helpers.insertQueries.reactions} ${helpers.parseValues('reaction', req.body)}`)
+    })
+    .then(() => res.send('Song Reaction Added'))
+    .catch(err => res.status(400).send(err));
+});
+
+// this request adds a song response to the database
+app.post('/songresponse', (req, res) => {
+  queries.queryDB(`${helpers.insertQueries.logs} ${helpers.parseValues('logs', req.body)}`)
+    .then(() => queries.queryDB(`${helpers.retrieveQueries.logId} logs."createdAt" = ${req.body.createdAt} AND logs.user_id = ${req.body.userId}`))
+    .then((result) => {
+      req.body.logId = helpers.getId(result);
+      return queries.queryDB(`${helpers.insertQueries.responses} ${helpers.parseValues('response', req.body)}`)
+    })
+    .then(() => res.send('Song Response Added'))
+    .catch(err => res.status(400).send(err));
 });
 
 // this request gets all playlist views for a given date
@@ -72,71 +118,6 @@ app.get('/songreactions', (req, res) => {
     .catch(err => res.status(400).send(err));
 });
 
-// this request adds a playlist view to the database
-app.post('/playlistview', (req, res) => {
-  // req.body.date = new Date();
-  const {user_id, date, session_id, createdAt, event_id, playlist_id, genre_id} = req.body;
-
-  const insertQueries = {
-    logs: 'INSERT INTO logs (user_id, date, "createdAt", "eventTypeId", "sessionId") VALUES',
-    views: 'INSERT INTO playlist_views (playlist_id, genre_id, date, "createdAt", "logId") VALUES',
-  }
-
-  queries.queryDB(`${insertQueries.logs} (${user_id}, '${date}', ${createdAt}, ${event_id}, ${session_id})`)
-    .then(() => queries.queryDB(`SELECT id from logs WHERE logs."createdAt" = ${createdAt} AND logs.user_id = ${user_id}`))
-    .then((result) => {
-      const values = `(${playlist_id}, ${genre_id}, '${date}', ${createdAt}, ${result[0][0].id})`;
-      return queries.queryDB(`${insertQueries.views} ${values}`);
-    })
-    .catch((err) => {
-      res.status(400).send(err);
-    });
-});
-
-// this request adds a genre searched to the database
-app.post('/search', (req, res) => {
-  // req.body.date = new Date();
-  queries.addToLogs(req.body)
-    .then((result) => {
-      req.body.logId = result.id;
-      return queries.addToSearch(req.body);
-    })
-    .then((result) => {
-      res.send(result.dataValues);
-    })
-    .catch((err) => {
-      res.status(400).send(err);
-    });
-});
-
-// this request adds a song reaction to the database
-app.post('/songreaction', (req, res) => {
-  // req.body.date = new Date();
-  queries.addToLogs(req.body)
-    .then((result) => {
-      req.body.logId = result.id;
-      return queries.addToSongReactions(req.body);
-    })
-    .then((result) => {
-      res.send(result.dataValues);
-    })
-    .catch((err) => {
-      res.status(400).send(err);
-    });
-});
-
-// this request adds a song response to the database
-app.post('/songresponse', (req, res) => {
-  // req.body.date = new Date();
-  queries.addToLogs(req.body)
-    .then((result) => {
-      req.body.logId = result.id;
-      return queries.addToSongResponses(req.body);
-    })
-    .then(result => res.send(result.dataValues))
-    .catch(err => res.status(400).send(err));
-});
-
 app.post('/dummydata', (req, res) => {
   dummydata.dropTables()
     .then(() => dummydata.addEvents())
@@ -149,7 +130,6 @@ app.post('/dummydata', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
-  console.log('Time', new Date());
 });
 
 module.exports = {
