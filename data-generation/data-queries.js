@@ -1,8 +1,11 @@
+require('../environment.js');
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index.js');
 const db = require('../database/queries.js');
 const { addDocumentsInBulk } = require('../elasticsearch/queries');
+const request = require('request');
+
 // const SQS = require('../server-aws/aws-queries.js');
 
 
@@ -118,8 +121,30 @@ const updateAWS = () => (
     .catch(err => console.log('error sending data to SQS', err))
 );
 
-module.exports = {
-  updateDatabase,
-  updateAWS
+// ********** SERVER REQUESTS ************* //
+
+const sendToServer = (type, event) => {
+  const endpoint = `http://${process.env.DB_HOSTNAME}:${process.env.PORT}/${type}`;
+  // if (type === 'songresponse') {
+  request.post(
+    {
+      url: endpoint,
+      body: event,
+      json: true
+    },
+    (err, response, body) => {
+      if (err) {
+        console.log('err making request', err);
+      } else {
+        console.log('response body received', body);
+      }
+    }
+  );
+  // }
 };
 
+module.exports = {
+  updateDatabase,
+  updateAWS,
+  sendToServer
+};
