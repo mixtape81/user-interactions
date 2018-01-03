@@ -1,44 +1,35 @@
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const files = require('./files-index');
-const helpers = require('./data-helpers1.js');
+const helpers = require('./data-helpers-real-time.js');
 const queries = require('./data-queries.js');
 
 let usersWithSessions;
-// let limit = 100000;
-let catchUpTillDate;
-let runEveryHour;
-let date = Date.now();
-let lastTimeStamp = date;
-let lastSession = `0--null--${date}--${date + (58 * 60000)}`;
-// let lastSession = `0--null--${helpers.startInMilliseconds}--${helpers.startInMilliseconds + (58 * 60000)}`;
-// lastSession = '3495379--7060--1509762542858--1509769262858';
+const currentTime = Date.now();
+let lastTimeStamp = currentTime;
+let lastSession = `0--null--${currentTime}--${currentTime + (58 * 60000)}`;
 let addTime;
 let lastEntry;
-// let lastTimeStamp = helpers.startInMilliseconds; //1509661839005; //Nov 2 /* ;*/
-
-// lastTimeStamp = 1509769262858;
 let lastTimeStampPerRound;
-// lastTimeStampPerRound = 1509769262858;
 
 
 // generate log object for elasticsearch
-const generateLog = (date, session, event) => {
-  const obj = {
-    user_id: Number(session[1]),
-    sessionId: Number(session[0]),
-    eventTypeId: event,
-    date: date.date,
-    createdAt: date.createdAt
-  };
-  return `${files.index}\n${JSON.stringify(obj)}\n`;
-};
+// const generateLog = (date, session, event) => {
+//   const obj = {
+//     user_id: Number(session[1]),
+//     sessionId: Number(session[0]),
+//     eventTypeId: event,
+//     date: date.date,
+//     createdAt: date.createdAt
+//   };
+//   return `${files.index}\n${JSON.stringify(obj)}\n`;
+// };
 
 // this function updates logs
-const updateLogs = (json, sql) => (
-  fs.appendFileAsync(files.logs, sql)
-    .then(() => fs.appendFileAsync(files.logsJSON, json))
-);
+// const updateLogs = (json, sql) => (
+//   fs.appendFileAsync(files.logs, sql)
+//     .then(() => fs.appendFileAsync(files.logsJSON, json))
+// );
 
 const updateUserSessions = () => {
   const users = [];
@@ -47,13 +38,13 @@ const updateUserSessions = () => {
 };
 
 // this function updates the files with the event info 
-const updateFiles = (jsonFile, sqlFile, json, sql, event) => {
-  return updateUserSessions()
-    .then(() => fs.appendFileAsync(jsonFile, json))
-    .then(() => fs.appendFileAsync(sqlFile, sql))
-    .then(() => (checkEntriesCount() && addToDB ? queries.updateDatabase() : null))
-    .catch(err => console.log(`error updating database in ${event}`, err));
-};
+// const updateFiles = (jsonFile, sqlFile, json, sql, event) => {
+//   return updateUserSessions()
+//     .then(() => fs.appendFileAsync(jsonFile, json))
+//     .then(() => fs.appendFileAsync(sqlFile, sql))
+//     .then(() => (checkEntriesCount() && addToDB ? queries.updateDatabase() : null))
+//     .catch(err => console.log(`error updating database in ${event}`, err));
+// };
 
 
 // this function triggers a playlist view
@@ -69,7 +60,9 @@ const triggerPlaylistView = (session) => {
     userId: Number(session[1]),
     eventId: 1
   };
-  queries.sendToServer('playlistview', view);
+  return updateUserSessions()
+    .then(() => queries.sendToServer('playlistview', view))
+    .catch(() => console.log('error adding playlist view'));
 };
 
 // this function triggers a genre searched
@@ -84,7 +77,10 @@ const triggerSearch = (session) => {
     userId: Number(session[1]),
     eventId: 2
   };
-  queries.sendToServer('search', search);
+
+  return updateUserSessions()
+    .then(() => queries.sendToServer('search', search))
+    .catch(() => console.log('error adding playlist view'));
 };
 
 // this function triggers a song reaction (liked/disliked)
@@ -102,7 +98,10 @@ const triggerSongReaction = (session) => {
     userId: Number(session[1]),
     eventId: 3
   };
-  queries.sendToServer('songreaction', songReaction);
+
+  return updateUserSessions()
+    .then(() => queries.sendToServer('songreaction', songReaction))
+    .catch(() => console.log('error adding playlist view'));
 };
 
 // this function triggers a song response (heard/skippeds)
@@ -120,17 +119,16 @@ const triggerSongResponse = (session) => {
     userId: Number(session[1]),
     eventId: 4
   };
-  queries.sendToServer('songresponse', songResponse);
-};
 
-const triggerSkip = () => {
-  // do nothing here
+  return updateUserSessions()
+    .then(() => queries.sendToServer('songresponse', songResponse))
+    .catch(() => console.log('error adding playlist view'));
 };
 
 // this function will initiate a trigger for a specific event for each session
 const triggerEventsOnSessions = (sessionsToTrigger) => {
   const events = {
-    skip: triggerSkip,
+    skip: (() => {}),
     playlistView: triggerPlaylistView,
     search: triggerSearch,
     songReaction: triggerSongReaction,
@@ -151,7 +149,7 @@ const archiveSessions = (active) => {
     .then(() => triggerEventsOnSessions(active))
     .then(() => {
       setTimeout(() => {
-      runScript();
+        runScript();
       }, 1000);
     })
     .catch(err => console.log('error archiving sessions', err));
@@ -258,7 +256,7 @@ const getSessions = () => {
 
 const runScript = () => {
   getSessions();
-}
+};
 
 runScript();
 

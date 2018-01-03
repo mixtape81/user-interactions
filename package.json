@@ -9,7 +9,7 @@
     "server-dev": "NODE_ENV=development nodemon server/index.js",
     "aws-server": "node server-aws/index.js",
     "test": "NODE_ENV=test mocha tests/specs.js --exit",
-    "generate-test": "NODE_ENV=test node data-generation/data-generator1.js",
+    "generate-test": "NODE_ENV=test node data-generation/data-gen-real-time.js",
     "generate": "node data-generation/data-generator.js"
   },
   "author": "Neha Chaudhary",
