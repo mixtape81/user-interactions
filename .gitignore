@@ -46,8 +46,8 @@ bower_components/
 data-generation/jsons/
 data-generation/sql-files/
 data-generation/text/
-data-generation/real-time/users.txt
-data-generation/real-time/sessions.txt
+data-generation/real-time-text-files/users.txt
+data-generation/real-time-text-files/sessions.txt
 
 # Amazon config
 awsconfig.json

@@ -19,11 +19,11 @@ const index = JSON.stringify({ index: {} });
 
 // text file that contains all the constants for data generator
 const users = path.join(__dirname, './text/users.txt');
-const currentUsers = path.join(__dirname, './real-time/users.txt');
+const currentUsers = path.join(__dirname, './real-time-text-files/users.txt');
 
 // text file to store sessions temporarily
 const sessions = path.join(__dirname, './text/sessions.txt');
-const currentSessions = path.join(__dirname, './real-time/sessions.txt');
+const currentSessions = path.join(__dirname, './real-time-text-files/sessions.txt');
 
 module.exports = {
   logs,
