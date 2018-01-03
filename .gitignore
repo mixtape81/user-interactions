@@ -30,6 +30,7 @@ coverage
 # Environment Variables
 .env.development
 .env.test
+.env.production
 
 # Compiled Dirs (http://nodejs.org/api/addons.html)
 build/
