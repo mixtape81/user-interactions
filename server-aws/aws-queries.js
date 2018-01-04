@@ -42,7 +42,6 @@ const processMessages = (message, done) => {
   // done();
 }
 
-
 module.exports = {
   addPermissionsForQueue,
   createQueue,
