@@ -23,7 +23,6 @@ process.on('unhandledRejection', (reason, p) => {
   // application specific logging, throwing an error, or other logic here
 });
 
-
 // this request adds a playlist view to the database
 app.post('/playlistview', (req, res) => {
   queries.queryDB(`${helpers.insertQueries.logs} ${helpers.parseValues('logs', req.body)}`)
@@ -76,19 +75,6 @@ app.post('/songresponse', (req, res) => {
 app.get('/playlistviews', (req, res) => {
   // req.query.date
   const query = `SELECT playlist_id, genre_id, "createdAt" FROM playlist_views where playlist_views."createdAt" between ${req.query.start} and ${req.query.end}`;
-  // 1507420800000
-  // 1507507200000
-  // const message = {
-  //   MessageBody: JSON.stringify(result),
-  //   QueueUrl: url,
-  //   MessageAttributes: {
-  //     Event: {
-  //       DataType: 'String',
-  //       StringValue: 'playlist views'
-  //     }
-  //   }
-  // };
-  // return AWS.sendMessage(message);
   queries.queryDB(query)
     .then(result => res.send(result))
     .catch(err => res.status(400).send(err))
@@ -99,15 +85,7 @@ app.get('/songresponses', (req, res) => {
   const query = `SELECT * FROM song_responses where song_responses.date='${req.query.date}'`;
   queries.queryDB(query)
     .then(result => res.send(result))
-    .catch(err => res.status(400).send(err));
-  // const body = {
-  //   query: {
-  //     size: 10000,
-  //     term: {
-  //       date: req.query.date
-  //     }
-  //   }
-  // };   
+    .catch(err => res.status(400).send(err)); 
 });
 
 // // this request to get songs liked/disliked from database for a given date
