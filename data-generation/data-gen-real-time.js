@@ -4,6 +4,7 @@ const files = require('./files-index');
 const helpers = require('./data-helpers-real-time.js');
 const queries = require('./data-queries.js');
 
+let count = 0;
 let usersWithSessions;
 const currentTime = Date.now();
 let lastTimeStamp = currentTime;
@@ -135,10 +136,16 @@ const triggerEventsOnSessions = (sessionsToTrigger) => {
     songResponse: triggerSongResponse
   };
 
+  if (sessionsToTrigger.length > 250) {
+    sessionsToTrigger.length = 250;
+  }
+  console.log('number of sessions to trigger is', sessionsToTrigger.length);
+ 
   sessionsToTrigger.forEach((session) => {
     const event = helpers.eventProbabilites(helpers.generateRandomEvent());
     events[event](helpers.parseSession(session));
     // events.songResponse(helpers.parseSession(session));
+    
   });
 };
 
@@ -148,6 +155,8 @@ const archiveSessions = (active) => {
     .then(() => fs.writeFileAsync(files.currentSessions, active))
     .then(() => triggerEventsOnSessions(active))
     .then(() => {
+      count++;
+      console.log('Count after this round is', count);
       setTimeout(() => {
         runScript();
       }, 1000);
@@ -188,7 +197,8 @@ const getLastTimeStampAndSessionId = (session) => {
 const generateRandomSessions = ({ timeStamp, sessionId }) => {
   let id = sessionId;
   let start = timeStamp + helpers.generateRandomSeconds(5000, 20000);
-  const sessionsToGenerate = helpers.averageSessionsPerDay(start);
+  const sessionsToGenerate = 15;
+  // helpers.averageSessionsPerDay(start);
   const sessions = [];
   for (let i = 0; i < sessionsToGenerate; i += 1) {
     const user = helpers.generateRandomUserId();

@@ -9,14 +9,17 @@ const config = {
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   dialect: 'postgres',
-  logging: false
+  logging: false,
+  pool: {
+    max: 90
+  }
 };
 
-// console.log('debug', config);
 
 const db = new Sequelize(config);
 
 db.authenticate()
+  .then(() => console.log('database connected'))
   .catch(err => console.error('Unable to connect to the database:', err));
 
 const EventType = db.define('event_type', {

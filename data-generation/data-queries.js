@@ -124,6 +124,7 @@ const updateAWS = () => (
 // ********** SERVER REQUESTS ************* //
 
 const sendToServer = (type, event) => {
+  // const startTime = new Date();
   const endpoint = `http://${process.env.DB_HOSTNAME}:${process.env.PORT}/${type}`;
   // if (type === 'songresponse') {
   request.post(
@@ -136,7 +137,9 @@ const sendToServer = (type, event) => {
       if (err) {
         console.log('err making request', err);
       } else {
-        console.log('response body received', body);
+        // const endTime = new Date();
+        // console.log('time taken', (endTime - startTime)/ 1000, endTime - startTime);
+        // console.log('response body received', body);
       }
     }
   );
