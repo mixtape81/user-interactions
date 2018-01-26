@@ -41,3 +41,8 @@ npm install
 - sequelize 4.17.2
 - sqs-consumer 3.8.0
 - winston 2.4.0 
+
+## System Overview 
+
+![alt text](https://github.com/mixtape81/user-interactions/system-overview.png " User Interactions Service");
+
