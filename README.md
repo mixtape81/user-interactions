@@ -44,5 +44,5 @@ npm install
 
 ## System Overview 
 
-![alt text](https://github.com/nehacp/mixtape81/user-interactions/system-overview.png " User Interactions Service");
+![alt text](https://github.com/mixtape81/user-interactions/blob/master/system-overview.png " User Interactions Service");
 
