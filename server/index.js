@@ -23,15 +23,23 @@ process.on('unhandledRejection', (reason, p) => {
   // application specific logging, throwing an error, or other logic here
 });
 
+
+
 // this request adds a playlist view to the database
 app.post('/playlistview', (req, res) => {
+  const startTime = new Date();
   queries.queryDB(`${helpers.insertQueries.logs} ${helpers.parseValues('logs', req.body)}`)
     .then(() => queries.queryDB(`${helpers.retrieveQueries.logId} logs."createdAt" = ${req.body.createdAt} AND logs.user_id = ${req.body.userId}`))
     .then((result) => {
       req.body.logId = helpers.getId(result);
       return queries.queryDB(`${helpers.insertQueries.views} ${helpers.parseValues('view', req.body)}`)
     })
-    .then(() => res.send('PlaylistView Added'))
+    .then(() => { 
+      const endTime = new Date();
+      let timeTaken = (endTime - startTime)/ 1000;
+      console.log('time taken', timeTaken);
+      res.send('PlaylistView Added')
+    })
     .catch(err => res.status(400).send(err));
 });
 
